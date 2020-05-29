@@ -1,18 +1,18 @@
 '''
 main script
 define classes for economical assessment and simulation results
-run tea 
+run tea
 '''
 import aux.handlefiles as hf
 import aux.materialbalance as amb
 import aux.teconas as tea
 
 ### define main
-class EL_Eco(object):
-    """main class EL_Eco."""
+class elEco(object):
+    """main class elEco."""
 
     def __init__(self, arg):
-        #super(EL_Eco, self).__init__()
+        #super(elEco, self).__init__()
         self.arg = arg
 
         #TODO# read parameter file
@@ -47,12 +47,12 @@ class EL_Eco(object):
 
         return
 
-class EL_Simu(object):
-    """docstring for EL_Simu."""
+class elSimu(object):
+    """docstring for elSimu."""
     ''' instances of simulation-results'''
 
     def __init__(self, arg):
-        #super(EL_Simu, self).__init__()
+        #super(elSimu, self).__init__()
         self.arg = arg
 
 
