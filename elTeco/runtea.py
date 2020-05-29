@@ -1,6 +1,7 @@
 '''
 main script
-### ###
+define classes for economical assessment and simulation results
+run tea 
 '''
 import aux.handlefiles as hf
 import aux.materialbalance as amb
