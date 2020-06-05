@@ -7,6 +7,8 @@ import aux.handlefiles as hf
 import aux.materialbalance as amb
 import aux.teconas as tea
 
+#TODO: decide which parameter data-type to use dict, or df)
+
 ### define main
 class elEco():
     """main class elEco."""
@@ -17,9 +19,16 @@ class elEco():
         self.basepath = os.getcwd()
         #TODO: decide, wether df or dict !
         self.Parameters = hf.handleParams(self.basepath)
-
+        self.simu_fllst = hf.handleInputFiles(self.basepath,self.Parameters)
+        self.simuInst =  # instances of
         #self.get_mat_data = self.sw_src(self.data_src_nm)
         #TODO: consider multiple par-tecos
+
+    def make_data_instances():
+        instances = []
+        for ?? in ???:
+            instances.append(elSimu())
+        return instances
 
     def run_tea(self):
         print('...run techno-economical-assessment...')
@@ -54,4 +63,4 @@ class elSimu(object):
 
     def __init__(self, arg):
         #super(elSimu, self).__init__()
-        self.arg = arg
+        self.arg = None

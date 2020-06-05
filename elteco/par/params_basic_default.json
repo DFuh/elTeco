@@ -1,19 +1,22 @@
 {
   "pth":"",
-  "flnm_tearesults":            "TECO_TEST__newStackRPL_noLAB_v07",
-  "flnm_materialbalance":       "TECO_TEST_22_mat_out__noLAB_v02",
-  "dirname":                    "teco_Testdir",
-  "savedf_materialbalance":     "true",
-  "savedf_tearesults":          "true",
-  "choose_datasource":          "",
-  "include_costs_electricity":          "true",
-  "include_costs_capitalinvest":        "true",
-  "include_costs_maintenance":          "true",
-  "include_costs_stackreplacement":     "true",
-  "include_costs_texasandinsurances":   "true",
-  "include_costs_labor":                "true",
-  "include_costs_water":                "true",
-  "print_while_reading_flnm":   "true",
-  "print_while_reading_props":  "true",
-  "print_tea_costs_values":     "false"
+  "flnm_tearesults":            "teco_results_DATATIMESTAMP_TEC_SIG_SCL_",
+  "flnm_materialbalance":       "materialbalance_results_DATATIMESTAMP_TEC_SIG_SCL_",
+  "dirname":                    "/data",
+  "savedf_materialbalance":     true,
+  "savedf_tearesults":          true,
+  "choose_datasource":          {"selection":"default",
+                                "description":"default-> ?
+                                0 ->
+                                1 -> "},
+  "include_costs_electricity":          true,
+  "include_costs_capitalinvest":        true,
+  "include_costs_maintenance":          true,
+  "include_costs_stackreplacement":     true,
+  "include_costs_texasandinsurances":   true,
+  "include_costs_labor":                true,
+  "include_costs_water":                true,
+  "print_while_reading_flnm":   true,
+  "print_while_reading_props":  true,
+  "print_tea_costs_values":     false
 }
