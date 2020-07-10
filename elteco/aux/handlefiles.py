@@ -9,6 +9,7 @@ import json
 import pandas as pd
 import tkinter
 ###
+
 # TODO: get_line()
 # TODO: group and sort fllst (by year and/or tag)
 # enable running program without installing tkinter
@@ -25,10 +26,12 @@ print('cwd: ', os.getcwd())
 # data from dir -> multiple scenarios
 ## specify/ distinguish on uuid and year
 
+
 class handleInputFiles():
     """ main handling of files
     """
     def __init__(self, basepath, params):
+
         self.basepath = basepath
         self.yr_cnt = 0
         self.basic_par = params.cont.basic
@@ -54,11 +57,13 @@ class handleInputFiles():
 
 
 
+
         # create path to ...???
         #self.mk_fl_pth()
         #self.datasource = self.selectsource()
 
         # choose data source (material balance) for calculation
+
 
     def ini_dict(self,):
         d = {
@@ -377,6 +382,7 @@ class handleInputFiles():
 
         #self.input_pth = basepath+'/data/in'
 
+
         # 0 -> default: simu-results file in data/in
         # 1 -> data from par
         # 2 -> existing materialbalance
@@ -385,7 +391,9 @@ class handleInputFiles():
 
         return
 
+
     '''
+
     def mk_fl_pth(self):
         ### create storga path for material balance
         self.sto_fl_pth = (self.glbPar.pth +'/'
@@ -393,6 +401,7 @@ class handleInputFiles():
         +'Mat_'+self.glbPar.sto_flnm+'.csv')
         ### create storga path for TEA results
         return
+
     '''
 
     def browse_pth(self):
@@ -416,6 +425,7 @@ class handleInputFiles():
     def read_sourcedata(self, path_to_file, specs=None):
         sim_data = None
         return sim_data
+
 
 
 
@@ -502,6 +512,7 @@ class handleInputFiles():
 
         # 4 -> from sig-df
         if (src == 4) or ('simpel' in src):
+
             print(' -- running simpEL as source -- ')
             print(' source-directory: ', self.sto_fl_pth)
             self.mk_fllst()
@@ -510,11 +521,13 @@ class handleInputFiles():
             else:
                 self.data_src_nm = 'fllst'
 
+
         elif (int_src == 3) or ('ext' in src):
             print(' -- browse external file -- ')
             pth = self.browse_pth()
 
         elif (int_src == 2) or ('int' in src):
+
             print(' -- checking for existing data -- ')
             self.check_mat_data()
             if not self.mat_exists:
@@ -530,7 +543,9 @@ class handleInputFiles():
             print(' -- using manually inserted data -- ')
             self.data_src_nm = 'man_lst'
 
+
         elif (src == 0) or ('default' in src):
+
             pass
         else:
             print(' --  using example source -- ')
@@ -675,6 +690,7 @@ class handleInputFiles():
         return df
 
 
+
 class handleOutputFiles():
 
     def __init(self):
@@ -694,10 +710,12 @@ class handleParams():
 
     def __init__(self, basepath):
         self.lst_parfiles = glob.glob(basepath+'/par/*.json')
+
         print(self.lst_parfiles)
         self.print_filelist(self.lst_parfiles, name='Parameter')
         self.parameter_version = self.select_par_version()
         self.cont = self.read_params(basepath)
+
         print(" --- finished parameter reading --- ")
 
     def print_filelist(self, fllst, name=None):
@@ -744,12 +762,14 @@ class handleParams():
 
         for pthi in par_strng:
             jsonpth = pth0 + '/par/params_' + pthi + suffix
+
             #df_par.append(self.json_to_df(jsonpth))
             #print(jsonpth)
             with open(jsonpth) as jsonfile:
                 data=json.load(jsonfile)
                 #print(data)
                 df_par.append(data)
+
 
 
         Parnatu = collections.namedtuple('Parnatu', 'basic ec teco_ael teco_pem ext_scen')

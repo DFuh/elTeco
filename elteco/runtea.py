@@ -32,5 +32,6 @@ if __name__ == '__main__':
         print('{} --->{}\n{}'.format(num, inst.name,inst.file_list))
         print('root-dir: ', inst.basepath)
         print('pth_list: ', inst.pth_lst)
+
     #print(tea_inst.Parameters.dfs.basic.dirname)
     #dat_inst = elSimu()

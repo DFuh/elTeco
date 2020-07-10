@@ -1,13 +1,16 @@
 {
+
   "directory_names": ["data/in/sample"],
   "selection_keys": [],
   "file_format": [".csv"],
+
   "flnm_tearesults":            "teco_results_DATATIMESTAMP_TEC_SIG_SCL_",
   "flnm_materialbalance":       "materialbalance_results_DATATIMESTAMP_TEC_SIG_SCL_",
   "dirname":                    "/data",
   "savedf_materialbalance":     true,
   "savedf_tearesults":          true,
   "choose_datasource":          {"selection":"default",
+
                                 "description": "default-> ? 0 -> 1 -> "},
   "include_costs_electricity":          true,
   "include_costs_capitalinvest":        true,

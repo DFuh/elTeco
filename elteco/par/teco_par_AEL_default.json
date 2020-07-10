@@ -1,0 +1,15 @@
+{
+  "costs_maintenance":            {"value": "19",     "unit":"€/(kW a)"},
+  "costs_taxesandinsurances":     {"value": "2",      "unit":"% CAPEX"},
+  "costs_labor":                  {"value": "41.91",  "unit":"€/h"},
+  "costs_diwater":                {"value": "1",      "unit":"€/t"},
+  "revenue_oxygen":               {"value": "",      "unit":"€/kg"},
+  "costs_plantacquisition":         {"value": "500",    "unit":"€/kW"},
+  "fraction_stackacquisition_pacq": {"value": "45.4",   "unit":"% PAcqC"},
+  "lang_factor":                  {"value": "1.54",   "unit":""},
+  "interest_rate":                {"value": "5",      "unit":"%"},
+  "number_supervisor_per_plant":  {"value": "1/20",       "unit":"-"},
+  "lifetime_electrolyser":        {"value": "20",       "unit":"a"},
+  "lifetime_stack":               {"value": "60_000",       "unit":"h"},
+
+}
