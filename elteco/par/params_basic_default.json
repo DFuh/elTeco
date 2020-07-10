@@ -1,0 +1,29 @@
+{
+  "directory_names": ["data/in/sample"],
+  "selection_keys": [],
+  "file_format": [".csv"],
+  "flnm_tearesults":            "teco_results_DATATIMESTAMP_TEC_SIG_SCL_",
+  "flnm_materialbalance":       "materialbalance_results_DATATIMESTAMP_TEC_SIG_SCL_",
+  "dirname":                    "/data",
+  "savedf_materialbalance":     true,
+  "savedf_tearesults":          true,
+  "choose_datasource":          {"selection":"default",
+                                "description": "default-> ? 0 -> 1 -> "},
+  "include_costs_electricity":          true,
+  "include_costs_capitalinvest":        true,
+  "include_costs_maintenance":          true,
+  "include_costs_stackreplacement":     true,
+  "include_costs_texasandinsurances":   true,
+  "include_costs_labor":                true,
+  "include_costs_water":                true,
+
+  "revenue_oxygen": {"value": [1, 2, 3], "unit": "€/kg"},
+
+  "print_while_reading_flnm":   true,
+  "print_while_reading_props":  true,
+  "print_tea_costs_values":     false,
+
+  "manual_file_selection": true,
+  "new_clc_matbal": false,
+  "tkinter_installed": false
+}
