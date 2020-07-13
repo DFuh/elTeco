@@ -711,7 +711,7 @@ class handleParams():
     def __init__(self, basepath):
         self.lst_parfiles = glob.glob(basepath+'/par/*.json')
 
-        print(self.lst_parfiles)
+        #print(self.lst_parfiles)
         self.print_filelist(self.lst_parfiles, name='Parameter')
         self.parameter_version = self.select_par_version()
         self.cont = self.read_params(basepath)
