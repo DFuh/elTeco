@@ -308,6 +308,8 @@ class handleInputFiles():
 
             lst = []
             sig_keys = ['WEA', 'PV']
+            sig_subkeys = ['off', 'on']
+            sig-plant_type = ?
             tec_keys = ['PEM', 'AEL']
             npf_keys = ['04', '06', '08']
             searchlist = [sig_keys, tec_keys, npf_keys]

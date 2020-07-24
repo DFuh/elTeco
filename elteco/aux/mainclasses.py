@@ -161,6 +161,9 @@ class elSimu(elEco):
     def mk_matbal_pth(self, ):
         '''
         create matbal-directory according to input file-location
+
+        [*** general version in EpoS ***]
+
         '''
         mat_pth_lst = []
         for pth in self.pth_lst: # pth list: full pth+filename.suffix
