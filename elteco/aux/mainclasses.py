@@ -34,14 +34,14 @@ class elEco():
 
         #super(elEco, self).__init__()
         #self.arg = arg
-        if not basepath:
+        if not basepath: # in case, basepath is not specified, use cwd
             self.basepath = os.getcwd()
             print('self.basepath: ', self.basepath)
         else:
             self.basepath = basepath
         #print('current working directory: ', self.basepath)
         #TODO: decide, wether df or dict ! # currently Params -> dict
-        self.Parameters = hf.handleParams(self.basepath)
+        self.Parameters = hf.handleParams(self.basepath) # read parameters
         self.inFls = hf.handleInputFiles(self.basepath,self.Parameters)
 
         self.simuinst = self.make_simu_instances()

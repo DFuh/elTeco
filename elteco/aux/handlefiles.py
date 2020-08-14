@@ -700,7 +700,11 @@ class handleOutputFiles():
         self.filename_materialbalance = None
         self.filename_teco_results = None
 
-        pass
+    def create_logfile(obj):
+        for att in obj.__dict__:
+            print(att,': ', getattr(obj,att))
+
+        return
 
 class handleParams():
     '''
