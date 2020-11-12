@@ -1,13 +1,13 @@
 {
 
-  "directory_names": ["data/in/dftest"],
+  "directory_names": ["data/in"],
   "selection_keys": [],
   "file_format": [".csv"],
 
   "flnm_tearesults":            "teco_results_DATATIMESTAMP_TEC_SIG_SCL_",
   "flnm_materialbalance":       "materialbalance_results_DATATIMESTAMP_TEC_SIG_SCL_",
-  "dirname_data_location":      ["/home/dafu_res/0_modeling/Projects/elTeco/elteco/data/in/dftest"],
-  "reference_dirname_dat_loc":  ["/home/dafu_res/0_modeling/Projects/elTeco/elteco/data/in"],
+  "dirname_data_location":      ["/home/dafu_res/0_modeling/Projects/EpoS/epos/data/out"],
+  "reference_dirname_dat_loc":  ["/home/dafu_res/0_modeling/Projects/EpoS/epos/data/out"],
   "savedf_materialbalance":     true,
   "savedf_tearesults":          true,
   "choose_datasource":          {"selection":"default",

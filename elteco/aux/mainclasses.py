@@ -3,17 +3,22 @@ main classes
 output plot ?
 '''
 import os
+import pandas as pd
 
 try:
     import aux
 except:
     pass
+from aux import handlefiles as hf
+'''
 try:
     import aux.handlefiles as hf
 except:
-    import elteco.aux.handlefiles as hf
+    import handlefiles as hf
+'''
 #from aux import elpower
-#import aux.materialbalance as mb
+from aux.materialbalance import MaterialBalance
+import aux.faux as fx
 #import aux.teconas as tea
 
 #TODO: decide which parameter data-type to use dict, or df)
@@ -30,10 +35,12 @@ print('M: ', __name__)
 class elEco():
     """main class elEco."""
 
-    def __init__(self, *args,basepath=None):
+    def __init__(self, *args, basepath=None):
 
         #super(elEco, self).__init__()
         #self.arg = arg
+        self.logger, self.logger_nm = fx.ini_logging(self, name='elEco')
+        self.logger.info('Ini logging: {}'.format(self.logger_nm))
         if not basepath: # in case, basepath is not specified, use cwd
             self.basepath = os.getcwd()
             print('self.basepath: ', self.basepath)
@@ -42,7 +49,7 @@ class elEco():
         #print('current working directory: ', self.basepath)
         #TODO: decide, wether df or dict ! # currently Params -> dict
         self.Parameters = hf.handleParams(self.basepath) # read parameters
-        self.inFls = hf.handleInputFiles(self.basepath,self.Parameters)
+        self.inFls = hf.handleInputFiles(self.basepath, self.Parameters)
 
         self.simuinst = self.make_simu_instances()
         #TODO: --> #self.simuInst =  # instances of
@@ -89,12 +96,14 @@ class elEco():
 
         return
 
+
     def make_instances(self, inst_params):
 
         inst_lst = []
         for item in fllst:
             inst_lst.append( elSimu( ) )
         return
+
 
 class elSimu(elEco):
     """docstring for elSimu."""
@@ -103,30 +112,43 @@ class elSimu(elEco):
     def __init__(self, basepath, par, fl, source=None):
         #super(elSimu, self).__init__()
         #self.arg = None
+        #print('---> fl in elSimu(): ', fl)
+        # TODO: raise error, if len(name, tec, sig ) >1 ?
         self.basepath = basepath
-        self.par = par
-        self.name = fl['name']
-        self.file_list = fl['files']
-        self.pth_lst = fl['full_flpth']
-        self.nominal_power = fl['PN']
-        self.tec = fl['tec']
-        self.sig = fl['sig']
-        self.years = fl['yrs']
+        self.par = par.cont
+        self.name = fl['name'][0]
+        self.files = fl['files']
+        #self.pth_lst = fl['full_flpth']
+        #self.nominal_power = fl['PN']
+        self.tec_el = fl['tec_el'][0]
+        self.tec_gen = fl['tec_gen'][0]
+        #self.sig = fl['sig']
+        self.years = fl['year']
         self.full_dict = fl
         self.df = fl['dfs']
         self.source = None
         self.oxy_reven = None
         self.info_dict = None
         self.skip = False # if True, dont consider in analysis
+
+        self.logger, self.logger_nm = fx.ini_logging(self, )
+        self.logger.info('Ini logging...: {}'.format(self.logger_nm))
         self.print_status()
 
-        self.matbal_pth_lst = self.mk_matbal_pth()
-        self.matbal_data_lst = self.ctrl_matbal()
+        self.matbal_pth_lst = self.mk_matbal_pth() # RENAME??? relative path from ref to matbal-directory
+        #self.matbal_data_lst = self.ctrl_matbal()
+        self.matbal_data = self.ctrl_matbal()
+        print('Matbal data ready: \n', self.matbal_data)
         '''
         self.matbal = mb.clc_materialbalance( ?? )
         '''
+
     def print_status(self, ):
         print('status ... -?-')
+        #print('elSimu: ', self.__name__)
+        print('elSimu: ', self.name)
+        print('elSimu, files: ', self.files)
+
         return
 
     def ctrl_matbal(self):
@@ -134,28 +156,54 @@ class elSimu(elEco):
         main-method for materialbalance
         '''
         # TODO: add selection: annual calc. or full (average) ???
-        forced_clc = self.par.cont.basic['new_clc_matbal'] # parameter, forced new clc of matbal
-        mb_data_lst = []
 
-        for num, flpth in enumerate(self.pth_lst):
-            mb_pth = self.matbal_pth_lst[num]
-            file_exists = os.path.exists(mb_pth)
+        ### mk path and dir
+        yr0 = self.years[0]
+        mb_pth = self.matbal_pth_lst[0] # TODO: -> [num] ?
+        #print('mb_pth: ', mb_pth)
+        #print('file_list[num]: ', self.files[yr0])
+        abs_pth_mb = hf.mk_abspath(basepath=self.basepath, tar=mb_pth, cat='mat' )
+        hf.mk_dir(abs_pth_mb)
+        abs_pth_data = os.path.join(self.basepath, self.files[yr0])
+        #print('year: ', str(yr))
+        flnm = os.path.basename(self.files[yr0].replace(str(yr0),'').replace('results', 'matbal'))
+        #flnm = flnm.replace('results', 'matbal')
+        flpth_mb = os.path.join(abs_pth_mb, flnm)
+        #print('flpth_matbal: ', flpth_mb)
+        file_exists = os.path.exists(flpth_mb)
 
-            if forced_clc or (not file_exists):
+        forced_clc = self.par.basic['new_clc_matbal'] # parameter, forced new clc of matbal
+
+        if forced_clc or (not file_exists):
+            mb_data_lst = []
+            mb_out = None
+            for num, yr in enumerate(self.years): #self.pth_lst):
                 # new calculation forced
-                print('Calc materialbalance for file: {}'.format(self.name[num]))
-                data_df = pd.read_csv(flpth)
-                mb_df_raw = self.clc_matbal(data_df)
-                mb_df.to_csv(mb_pth)
-            else:
-                print('material-balance-data already exists')
-                self.skip_matbal = True
-                mb_df_raw = pd.read_csv(mb_pth)
+                mb = MaterialBalance()
 
-            mb_df = mb.process_df(mb_df_raw) ### yet to be edited
+                print('Calc materialbalance for file: {}'.format(self.name))
+                #data_df = pd.read_csv(abs_pth_data)
+                data_df = self.df[yr]
+                #mb_df_raw = self.clc_matbal(data_df)
+                df_in = mb.process_df(data_df)
+                if isinstance(df_in, pd.DataFrame):
+                    df_out = mb.clc_materialbalance(df_in, yr)
+                    if isinstance(mb_out, pd.DataFrame):
+                        mb_out = mb_out.append(df_out, ignore_index=True)
+                    else:
+                        mb_out = df_out.copy()
+                #mb_df.to_csv(mb_pth)
+            mb_out.to_csv(flpth_mb)
+        else:
+            print('material-balance-data already exists')
+            self.skip_matbal = True
+            mb_out = pd.read_csv(flpth_mb)
 
-            mb_data_lst.append(mb_df)
-        return mb_data_lst
+            #mb_df = mb.process_df(mb_df_raw) ### yet to be edited
+
+            #mb_data_lst.append(mb_df)
+
+        return mb_out
 
 
     def mk_matbal_pth(self, ):
@@ -164,8 +212,23 @@ class elSimu(elEco):
 
         [*** general version in EpoS ***]
 
+        edit 20200817:
+        more effective and improved version, considering input directly from simu-output-directory (or any specified dir)
         '''
+
         mat_pth_lst = []
+        basepath_data_output = self.basepath + '/data/out'
+        #print('self.par.basic: ', self.par.basic)
+        #if not hasattr(self.par.basic, 'dirname_data_location'):
+        if not 'dirname_data_location' in self.par.basic:
+            splt_by = 'elTeco/elteco/data/in' # string to split path by; default: 'elTeco/elteco/data/in'
+            end = testpath.split(splt_by)[1] #???
+        else:
+            for loc, ref in zip(self.par.basic['dirname_data_location'], self.par.basic['reference_dirname_dat_loc']):
+
+                end = loc.split(ref)[1]
+                mat_pth_lst.append(end)
+        '''
         for pth in self.pth_lst: # pth list: full pth+filename.suffix
             pure_pth, flnm = os.path.split(pth) #full pth
             last_dir = os.path.basename(pure_pth)
@@ -185,11 +248,11 @@ class elSimu(elEco):
             if not os.path.exists(newpath):
                 os.makedirs(newpath)
         ###########################################
-
+        '''
         return mat_pth_lst
 
 
-    def clc_matbal(self, filepath):
+    def clc_matbal(self, df_i, yr_i):
         '''
         clc materialbalance for every year of simu
         and write one row for each year in final df
@@ -203,20 +266,20 @@ class elSimu(elEco):
         '''
 
         #for yr_i, df_i in self.full_dict['dfs'].items():
-        for yr_i in self.years:
+        #for i, yr_i in enumerate(self.years):
 
-            df_i = self.full_dict['dfs'][yr_i]
-            file_i = self.full_dict['files'][yr_i]
-            if not self.full_dict['existing_matbal'][yr_i] and use_existing_matbal == False:
-                if not df_i:
-                    if smplSigClc == True:
-                        pass
-                        #elpower.
-                    else:
-                        # TODO: empty row in df -->>???
-                        pass
-                else:
-                    mb_out = mb.clc_materialbalance(df_i)
-            pass
+        #df_i = self.full_dict['dfs'][yr] # Redundant code in ini
+        #file_i = self.full_dict['files'][yr] #
+        mb_out = None
 
+        return mb_out
+
+    def smpl_clc():
+        if not df_i:
+            if smplSigClc == True:
+                pass
+                #elpower.
+            else:
+                # TODO: empty row in df -->>???
+                pass
         return

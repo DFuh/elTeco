@@ -84,7 +84,7 @@ class handleInputFiles():
     def mk_fllst(self, single_dir=True):
         # single or multiple ?
         # select source
-        fllst_raw = self.search_files(dirnm = self.basic_par['directory_names'],
+        fllst_raw = self.search_files(dirnms = self.basic_par['directory_names'],
                                         key = self.basic_par['selection_keys'])
 
         if not self.basic_par['manual_file_selection']:
@@ -94,7 +94,10 @@ class handleInputFiles():
             for num, fl in enumerate(fllst_raw):
                 print(num,'->', fl)
             # return list of integers for indexing (for selection out of filelist)
+
+            # TODO: input check -> non valid input: return None, close progr.
             idx = list(map(int, list(input('select items: [int, int,..]').split(','))))
+
             fllst = [fllst_raw[i] for i in idx]
             ####
         ###
@@ -128,7 +131,15 @@ class handleInputFiles():
         list_of_dicts = []
 
         for fl in fllst: # fllst contains full paths
-            dct = self.read_specs(fl)
+            dct, df_skpr = self.read_specs(fl)
+            #print('df_skpr: ', df_skpr)
+            #dct['df'] = pd.read_csv(fl,skiprows=(df_skpr), parse_dates=[0])
+            df = pd.read_csv(fl,skiprows=(df_skpr), index_col=[0])
+            #print('df: ', df.head())
+            #df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d HH:%MM:%SS')
+            df['date'] = pd.to_datetime(df['date'],unit='ns')
+            dct['df'] = df
+            dct['file'] = fl
             list_of_dicts.append(dct)
 
         final_list = self.merge_lod(list_of_dicts)
@@ -156,9 +167,10 @@ class handleInputFiles():
         merge list of dicts
         '''
         #print('list of dicts:', lod)
-
+        #self.logger.info('Merge lod...')
 
         df = pd.DataFrame(lod)      # make df from lod
+        #print('df_od: ', df)
         inter1 = df.groupby(group_by)  # group by tags
         #self.print_it(inter1)
         #>>>> still an error below: <<<<<<<
@@ -168,7 +180,7 @@ class handleInputFiles():
 
         d_list  =  []                           # initialize output list
         for thing in inter1:                    # loop trough pd.groupby object /// returns tuple for each group
-            #print(thing[0])
+            #print('thing: ',thing)
             grp = inter1.get_group(thing[0])    # get group by sort-name
             #lst = []
             d = {}                              # initialize output dict
@@ -180,8 +192,10 @@ class handleInputFiles():
                 else:
                     d[cnm] = grp[cnm].tolist()          # removing duplicates doesnt work for dataframes
 
-            dct = dict(zip(d['yrs'],d['files']))        # put files in subdict (for calling by year)
-            df_dct = dict(zip(d['yrs'],d['dfs']))       # put dfs in subdict (for calling by year)
+            #dct = dict(zip(d['yrs'],d['files']))        # put files in subdict (for calling by year)
+            #df_dct = dict(zip(d['yrs'],d['dfs']))       # put dfs in subdict (for calling by year)
+            dct = dict(zip(d['year'],d['file']))        # put files in subdict (for calling by year)
+            df_dct = dict(zip(d['year'],d['df']))       # put dfs in subdict (for calling by year)
             d['files'] = dct
             d['dfs'] = df_dct
             d_list.append(d)
@@ -225,7 +239,7 @@ class handleInputFiles():
         return lod_out
     '''
 
-    def search_files(self, dirnm=None, key=None):
+    def search_files(self, dirnms=None, key=None):
         '''
         check different locations for files to use
         dirnm -> lst of paths
@@ -237,12 +251,12 @@ class handleInputFiles():
         fllst = []
         #if not matbal: # search with key
 
-        for nm in dirnm: # select, wether to use default or spec path
+        for nm in dirnms: # select, wether to use default or spec path
             if 'nopath' in nm.lower(): # use default path
                 spth = './data/in' # TODO: check for duplication with file_pth()
             else: # use specified path
             #<<<<<<<<<<< still problem with path
-                spth = dirnm[0]
+                spth = dirnms[0]
                 #spth = self.basepath+dirnm[0] # TODO: enable multiple paths
             spth_lst.append(spth)
         print('search directories: ', spth_lst)
@@ -263,7 +277,7 @@ class handleInputFiles():
 
 #############################################################
 
-    def get_line(self, filepth, search_text='end_info', num_end=100):
+    def get_line(self, filepth, search_text='end Simu - metadata', num_end=100):
         '''
         get line in csv, where ist says 'end info' (default)
         or any specified search text
@@ -283,9 +297,23 @@ class handleInputFiles():
         -- check, if matbal exists
         '''
         filename = os.path.splitext(os.path.basename(filepth))[0]
+        skpl = self.get_line(filepth, search_text='begin Simu - metadata') # get last line (number) of specs
         line = self.get_line(filepth) # get last line (number) of specs
+        df_sl = self.get_line(filepth, search_text='begin Simu - data') # number of lines to skip for df reading
+        #print('line: ', line)
+        #print('skpl: ', skpl)
         if line:
-            d_specs = pd.read_csv(filepth, index_col=0,skiprows=1, nrows=line-2, header=None).T.to_dict('records')[0]
+            d_in = pd.read_csv(filepth, index_col=0,skiprows=skpl, nrows=line-skpl-1, header=None).T.to_dict('records')[0]
+            d_specs = {}
+            for key, val in d_in.items():
+                #print('key:', key)
+                strpkey = key.strip()
+                #print('strpkey: ', strpkey)
+                #print('strpval: ', val.strip())
+                #if strpkey != key:
+                #del d_specs[key]
+                #d_specs[strpkey] = val.strip()
+                d_specs[strpkey] = val.strip()
             ### -> reading data only, if not matbal (in elSimu-instances)
             df_data = None #pd.read_csv(filepth, index_col=0, skiprows=line)
             #tag = d['tag']
@@ -307,13 +335,14 @@ class handleInputFiles():
             print('---<->>>>> filename[:-51]: ', filename[:-51])
 
             lst = []
-            sig_keys = ['WEA', 'PV']
+            gen_tec_keys = ['WEA', 'PV']
             sig_subkeys = ['off', 'on']
-            sig-plant_type = ?
+            gen_plant_type = None #?
             tec_keys = ['PEM', 'AEL']
             npf_keys = ['04', '06', '08']
-            searchlist = [sig_keys, tec_keys, npf_keys]
-            key_lst = ['sig', 'tec', 'npf']
+            nomp_keys = ['']
+            searchlist = [gen_tec_keys, tec_keys, npf_keys, nomp_keys]
+            key_lst = ['gen_tec', 'el_tec', 'scl', 'nomp']
             #TODO: d_speca from defaultdict?
             d_specs = self.def_dict.copy()
             #print('d_specs:', d_specs)
@@ -340,6 +369,7 @@ class handleInputFiles():
                     print('no specs of date in df...')
                     y = str(self.yr_cnt)
                     self.yr_cnt += 1
+
             y_un = self.unique_list(y) # return unique objects
             if len(y_un)>1:
                 print('more than 1 year in df....????')
@@ -354,7 +384,7 @@ class handleInputFiles():
                 d_specs['dfs'] = df_data #{yr_strng : df_data}
             #print('d_specs', d_specs)
             d_specs['full_flpth'] = filepth
-        return d_specs#, df_data
+        return d_specs, df_sl#, df_data
 
 
 
@@ -392,6 +422,7 @@ class handleInputFiles():
         # 4 -> ??? from sig-df ->> SIMPEL
 
         return
+
 
 
     '''
@@ -691,7 +722,27 @@ class handleInputFiles():
         df.columns = new_cols
         return df
 
+def mk_abspath(basepath='', tar='', cat=None):
 
+    if tar[0]=='/':
+        tar = tar[1:]
+    ### mat
+    if 'mat' in cat:
+        relpth = 'data/mat/'
+    ### data
+    elif 'data' in cat:
+        relpth = 'data/out/'
+
+    elif not cat:
+        relpth = ''
+
+    return os.path.join(basepath, relpth, tar)
+
+def mk_dir(abspth, dirnm=None):
+    if not os.path.exists(abspth):
+        os.mkdir(abspth)
+        print(f'...creating directory: {abspth}')
+    return
 
 class handleOutputFiles():
 
