@@ -109,13 +109,14 @@ class elSimu(elEco):
     """docstring for elSimu."""
     ''' instances of simulation-results'''
 
-    def __init__(self, basepath, par, fl, source=None):
+    def __init__(self, basepath, Par, fl, source=None):
         #super(elSimu, self).__init__()
         #self.arg = None
         #print('---> fl in elSimu(): ', fl)
         # TODO: raise error, if len(name, tec, sig ) >1 ?
         self.basepath = basepath
-        self.par = par.cont
+        self.par = Par.ntpar # Params as NamedTuple:
+                             # basic, electricity_costs, teco_AEL, teco_PEM, external_scenario
         self.name = fl['name'][0]
         self.files = fl['files']
         #self.pth_lst = fl['full_flpth']
@@ -138,7 +139,7 @@ class elSimu(elEco):
         self.matbal_pth_lst = self.mk_matbal_pth() # RENAME??? relative path from ref to matbal-directory
         #self.matbal_data_lst = self.ctrl_matbal()
         self.matbal_data = self.ctrl_matbal()
-        print('Matbal data ready: \n', self.matbal_data)
+        #print('Matbal data ready: \n', self.matbal_data)
         '''
         self.matbal = mb.clc_materialbalance( ?? )
         '''

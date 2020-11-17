@@ -771,7 +771,7 @@ class handleParams():
         #print(self.lst_parfiles)
         self.print_filelist(self.lst_parfiles, name='Parameter')
         self.parameter_version = self.select_par_version()
-        self.cont = self.read_params(basepath)
+        self.ntpar = self.read_params(basepath)
 
         print(" --- finished parameter reading --- ")
 

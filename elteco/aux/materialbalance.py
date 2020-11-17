@@ -106,7 +106,7 @@ class MaterialBalance():
         for key, val in zip(keys, vals):
             mb_dct[key] = [val]
 
-        print('mb_dict: ', mb_dct)
+        #print('mb_dict: ', mb_dct)
         mb_df = pd.DataFrame.from_dict(mb_dct)
         return mb_df
 
