@@ -196,17 +196,21 @@ class elSimu(elEco):
                     else:
                         mb_out = df_out.copy()
                 #mb_df.to_csv(mb_pth)
-            mb_out.to_csv(flpth_mb)
+            mb_out.to_csv(flpth_mb, index=False)
+            mb_out = mb_out.set_index('year')
+            dct_mb = mb_out.T.to_dict()
         else:
             print('material-balance-data already exists')
             self.skip_matbal = True
             mb_out = pd.read_csv(flpth_mb)
-
+            mb_out = mb_out.set_index('year')
+            dct_mb = mb_out.T.to_dict()
             #mb_df = mb.process_df(mb_df_raw) ### yet to be edited
 
             #mb_data_lst.append(mb_df)
 
-        return mb_out
+        return dct_mb
+
 
 
     def mk_matbal_pth(self, ):

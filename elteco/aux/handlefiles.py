@@ -744,6 +744,17 @@ def mk_dir(abspth, dirnm=None):
         print(f'...creating directory: {abspth}')
     return
 
+def df_to_dct(df_in, idx_col=None):
+    '''
+    return dict from df
+    '''
+    df = df_in.copy()
+    if idx_col:
+        df = df.set_index(idx_col)
+    list(df_in.itertuples(name='Row', index=False))
+
+    return
+
 class handleOutputFiles():
 
     def __init(self):
