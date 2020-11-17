@@ -49,8 +49,8 @@ class elEco():
             self.basepath = basepath
         #print('current working directory: ', self.basepath)
         #TODO: decide, wether df or dict ! # currently Params -> dict
-        self.Parameters = hp.handleParams(self.basepath) # read parameters
-        self.inFls = hf.handleInputFiles(self.basepath, self.Parameters)
+        self.parameters = hp.handleParams(self.basepath) # read parameters, return dict
+        self.inFls = hf.handleInputFiles(self.basepath, self.parameters.dct)
 
         self.simuinst = self.make_simu_instances()
         #TODO: --> #self.simuInst =  # instances of
@@ -64,7 +64,7 @@ class elEco():
     def make_simu_instances(self):
         instances = []
         for fl in self.inFls.list_of_dicts:
-            instances.append( elSimu( self.basepath, self.Parameters, fl, ) )
+            instances.append( elSimu( self.basepath, self.parameters.dct, fl, ) )
         #for ?? in ???:
         #    instances.append(elSimu())
         return instances
@@ -110,13 +110,14 @@ class elSimu(elEco):
     """docstring for elSimu."""
     ''' instances of simulation-results'''
 
-    def __init__(self, basepath, Par, fl, source=None):
+    def __init__(self, basepath, params, fl, source=None):
         #super(elSimu, self).__init__()
         #self.arg = None
         #print('---> fl in elSimu(): ', fl)
         # TODO: raise error, if len(name, tec, sig ) >1 ?
         self.basepath = basepath
-        self.par = Par.ntpar # Params as NamedTuple:
+        #self.par = Par.ntpar # Params as NamedTuple:
+        self.par = params # Parameters as dict
                              # basic, electricity_costs, teco_AEL, teco_PEM, external_scenario
         self.name = fl['name'][0]
         self.files = fl['files']
@@ -174,7 +175,7 @@ class elSimu(elEco):
         #print('flpth_matbal: ', flpth_mb)
         file_exists = os.path.exists(flpth_mb)
 
-        forced_clc = self.par.basic['new_clc_matbal'] # parameter, forced new clc of matbal
+        forced_clc = self.par['basic']['new_clc_matbal'] # parameter, forced new clc of matbal
 
         if forced_clc or (not file_exists):
             mb_data_lst = []
@@ -222,11 +223,11 @@ class elSimu(elEco):
         basepath_data_output = self.basepath + '/data/out'
         #print('self.par.basic: ', self.par.basic)
         #if not hasattr(self.par.basic, 'dirname_data_location'):
-        if not 'dirname_data_location' in self.par.basic:
+        if not 'dirname_data_location' in self.par['basic']:
             splt_by = 'elTeco/elteco/data/in' # string to split path by; default: 'elTeco/elteco/data/in'
             end = testpath.split(splt_by)[1] #???
         else:
-            for loc, ref in zip(self.par.basic['dirname_data_location'], self.par.basic['reference_dirname_dat_loc']):
+            for loc, ref in zip(self.par['basic']['dirname_data_location'], self.par['basic']['reference_dirname_dat_loc']):
 
                 end = loc.split(ref)[1]
                 mat_pth_lst.append(end)

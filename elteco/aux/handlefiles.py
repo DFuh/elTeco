@@ -34,7 +34,7 @@ class handleInputFiles():
 
         self.basepath = basepath
         self.yr_cnt = 0
-        self.basic_par = params.ntpar.basic
+        self.basic_par = params['basic'] # basic parameter dict
         self.fllst = self.mk_fllst() # make list of files (fullpath) containing simudata or sigdata
         self.def_dict = self.ini_dict()
         self.list_of_dicts = self.files_to_dicts(self.fllst)

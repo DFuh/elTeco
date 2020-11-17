@@ -20,7 +20,7 @@ class handleParams():
         #print(self.lst_parfiles)
         self.print_filelist(self.lst_parfiles, name='Parameter')
         self.parameter_version = self.select_par_version()
-        self.ntpar = self.read_params(basepath)
+        self.dct = self.read_params(basepath)
 
         print(" --- finished parameter reading --- ")
 
@@ -53,7 +53,8 @@ class handleParams():
         read parameter files based on version
         '''
 
-        df_par = []#[df_bscpar, df_ecpar, df_tecopar_ael, df_tecopar_pem]
+        #df_par = []#[df_bscpar, df_ecpar, df_tecopar_ael, df_tecopar_pem]
+        dct_par = {}
         par_strng = ['basic',
                     'electricity_costs',
                     'teco_AEL',
@@ -73,20 +74,21 @@ class handleParams():
             #print(jsonpth)
             with open(jsonpth) as jsonfile:
                 data=json.load(jsonfile)
-                #print(data)
-                df_par.append(data)
+                print(data)
+                #df_par.append(data)
+                dct_par[pthi] = data
 
 
-
+        '''
         Parnatu = collections.namedtuple('Parnatu', 'basic ec teco_ael teco_pem ext_scen')
         Par_dfs = Parnatu._make([df_par[0],
                 df_par[1],
                 df_par[2],
                 df_par[3],
                 df_par[4]])
+        '''
 
-
-        return Par_dfs
+        return dct_par #Par_dfs
     '''
     def mk_params_pth(pth0, paths, vers=False):
 
@@ -96,15 +98,17 @@ class handleParams():
             fpthi.append()
         return
     '''
+    '''
     def json_to_df(self, jsonpth):
         print('Open file: {}'.format(jsonpth))
         # easier to use pandas directly
-        '''
+        ''''''
         with open(jsonpth) as json_data:
             data = json.load(json_data)
 
         print('data (json): ', data)
         df = pd.DataFrame(data).T
-        '''
+        ''''''
         data = pd.read_json(jsonpth, orient='index')
         return data
+    '''

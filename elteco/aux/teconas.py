@@ -7,9 +7,11 @@ do techno-economic-analysis calculation
 def econ(self):#CstPar_in, eC, mat_in, signm):
         ''' adopted from CS_Mod/Eco_clc_oop_v063.py '''
         #Mat = self.mat
-        Tec = self.par['teco_'+self.tec_el]
-        ''' CAUTION: glbPar -> not tec-specific'''
+        Tec = self.par['teco_'+self.tec_el] #tec specific parameters | dict
+        #''' CAUTION: glbPar -> not tec-specific'''
+        Mat = self.matbal_data
 
+        # TODO: consider multiple years !
         clc_auxVal(self, Mat, Tec)
 
         ''' >>>>>>>>>>>>>>>>> check and edit below !! <<<<<<<<<<<<<<<<<<<<<< '''
