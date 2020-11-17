@@ -10,6 +10,7 @@ try:
 except:
     pass
 from aux import handlefiles as hf
+from aux import handleparameters as hp
 '''
 try:
     import aux.handlefiles as hf
@@ -48,7 +49,7 @@ class elEco():
             self.basepath = basepath
         #print('current working directory: ', self.basepath)
         #TODO: decide, wether df or dict ! # currently Params -> dict
-        self.Parameters = hf.handleParams(self.basepath) # read parameters
+        self.Parameters = hp.handleParams(self.basepath) # read parameters
         self.inFls = hf.handleInputFiles(self.basepath, self.Parameters)
 
         self.simuinst = self.make_simu_instances()
