@@ -74,7 +74,7 @@ class handleParams():
             #print(jsonpth)
             with open(jsonpth) as jsonfile:
                 data=json.load(jsonfile)
-                print(data)
+                #print(data)
                 #df_par.append(data)
                 dct_par[pthi] = data
 

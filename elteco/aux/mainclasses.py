@@ -4,13 +4,14 @@ output plot ?
 '''
 import os
 import pandas as pd
-
+import time
 try:
     import aux
 except:
     pass
 from aux import handlefiles as hf
 from aux import handleparameters as hp
+from aux import teconas as tea
 '''
 try:
     import aux.handlefiles as hf
@@ -63,38 +64,18 @@ class elEco():
 
     def make_simu_instances(self):
         instances = []
-        for fl in self.inFls.list_of_dicts:
+        for num,fl in enumerate(self.inFls.list_of_dicts):
+            #print('-----> Number of inst.: ', num)
+            #print('-----> dict: ', fl)
             instances.append( elSimu( self.basepath, self.parameters.dct, fl, ) )
         #for ?? in ???:
         #    instances.append(elSimu())
         return instances
 
     def run_tea(self):
-        print('...run techno-economical-assessment...')
-        #check_mat_data(self)
-
-        ### prepare files
-
-        ### provide material data
-
-        ### techno-economical assessment
-
-        ### data output
-
-        ### data visualization
-
-        self.mk_fl_pth()
-        #TODO: check, if mat-df exists: override or new flnm?
-        self.cc_data_source()
-
-
-        #self.get_mat_data() -> elSimu
-        #self.mk_mat_df()  -> elSimu
-
-        self.clc_eco()
-
-        self.mk_full_df()
-
+        for num,inst in enumerate(self.simuinst):
+            l = ['AAA','BBB','CCC','DDD']
+            inst.run_technoeconomical_assessment(key=l[num])
         return
 
 
@@ -125,6 +106,10 @@ class elSimu(elEco):
         #self.nominal_power = fl['PN']
         self.tec_el = fl['tec_el'][0]
         self.tec_gen = fl['tec_gen'][0]
+        #====================================
+        self.el_pwr_nom = fl['el_pwr_nom'][0] # Nominal power of EL-plant
+        self.el_pwr_max = fl['el_pwr_max'][0] # Max power of EL-plant
+        #====================================
         #self.sig = fl['sig']
         self.years = fl['year']
         self.full_dict = fl
@@ -152,6 +137,42 @@ class elSimu(elEco):
         print('elSimu: ', self.name)
         print('elSimu, files: ', self.files)
 
+        return
+
+    def run_technoeconomical_assessment(self, key=None):
+        print('...run techno-economical-assessment...')
+        #check_mat_data(self)
+
+        tea.run_teconas(self, )
+
+        ### save final df
+        fin_df = pd.DataFrame.from_dict(self.matbal_data)
+        out_pth = self.par['basic']['dirname_data_location'][0]
+        if key:
+            flnm = self.name+key+'_testoutput.csv'
+        outpath = os.path.join(out_pth,flnm)
+        outpth = outpath.replace('/in','/out')
+        fin_df.to_csv(outpth)
+        ### provide material data
+
+        ### techno-economical assessment
+
+        ### data output
+
+        ### data visualization
+        '''
+        self.mk_fl_pth()
+        #TODO: check, if mat-df exists: override or new flnm?
+        self.cc_data_source()
+
+
+        #self.get_mat_data() -> elSimu
+        #self.mk_mat_df()  -> elSimu
+
+        self.clc_eco()
+
+        self.mk_full_df()
+        '''
         return
 
     def ctrl_matbal(self):
@@ -198,7 +219,7 @@ class elSimu(elEco):
                 #mb_df.to_csv(mb_pth)
             mb_out.to_csv(flpth_mb, index=False)
             mb_out = mb_out.set_index('year')
-            dct_mb = mb_out.T.to_dict()
+            dct_mb = mb_out.T.to_dict() # TODO: unefficient!!! dict->df->dict (see:materialbalance)
         else:
             print('material-balance-data already exists')
             self.skip_matbal = True

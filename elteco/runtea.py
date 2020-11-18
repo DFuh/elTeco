@@ -4,7 +4,7 @@ define classes for economical assessment and simulation results
 run tea
 '''
 from aux.mainclasses import elEco, elSimu
-import aux.handlefiles as hfs 
+import aux.handlefiles as hfs
 '''
 def mainrun():
     tea_inst = elEco()
@@ -29,10 +29,15 @@ if __name__ == '__main__':
     #mainrun()
     print('...run...')
     tea_inst = elEco()
-    for num,inst in enumerate(tea_inst.simuinst):
-        print('{} --->{}\n{}'.format(num, inst.name,inst.file_list))
-        print('root-dir: ', inst.basepath)
-        print('pth_list: ', inst.pth_lst)
+    tea_inst.run_tea()
+
+    #for num,inst in enumerate(tea_inst.simuinst):
+
+        #print('num: ', num)
+        #inst.
+        #print('{} --->{}\n{}'.format(num, inst.name,inst.file_list))
+        #print('root-dir: ', inst.basepath)
+        #print('pth_list: ', inst.pth_lst)
 
     #print(tea_inst.Parameters.dfs.basic.dirname)
     #dat_inst = elSimu()

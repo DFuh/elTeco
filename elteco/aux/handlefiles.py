@@ -36,6 +36,7 @@ class handleInputFiles():
         self.yr_cnt = 0
         self.basic_par = params['basic'] # basic parameter dict
         self.fllst = self.mk_fllst() # make list of files (fullpath) containing simudata or sigdata
+        print('----> fllst: ', self.fllst)
         self.def_dict = self.ini_dict()
         self.list_of_dicts = self.files_to_dicts(self.fllst)
         print('############### ----- created list of dicts...')
@@ -92,7 +93,7 @@ class handleInputFiles():
         else: #(additional) manual selection
             ### -- select files ?
             for num, fl in enumerate(fllst_raw):
-                print(num,'->', fl)
+                print('fl: ',num,'->', fl)
             # return list of integers for indexing (for selection out of filelist)
 
             # TODO: input check -> non valid input: return None, close progr.
@@ -263,7 +264,7 @@ class handleInputFiles():
         for num,spth in enumerate(spth_lst):
             #print('glob-output: ', glob.glob(spth + '/*'+self.basic_par['file_format'][0]))
             for fl in glob.glob(spth + '/*'+self.basic_par['file_format'][0]): # TODO: enable multi formats???
-                print('fl:', fl)
+                #print('fl:', fl)
                 if not key:
                     fllst.append(fl)
                 elif len(key)>1:

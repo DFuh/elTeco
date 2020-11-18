@@ -1,8 +1,8 @@
 {
-  "nosurch_spec_costs_electricity_pv":    {"value":"45 *1e-3", "unit":"€/kWh"},
-  "nosurch_spec_costs_electricity_woff":  {"value":"154 *1e-3", "unit":"€/kWh"},
-  "nosurch_spec_costs_electricity_wolon": {"value":"45 *1e-3", "unit":"€/kWh"},
-  "nosurch_spec_costs_electricity_wneon": {"value":"93 *1e-3", "unit":"€/kWh"},
+  "nosurch_spec_costs_electricity_pv":    {"value":45e-3, "unit":"€/kWh"},
+  "nosurch_spec_costs_electricity_wind_offshore":  {"value":154e-3, "unit":"€/kWh"},
+  "nosurch_spec_costs_electricity_wind_onshore_peeg": {"value":45e-3, "unit":"€/kWh"},
+  "nosurch_spec_costs_electricity_wind_onshore": {"value":93e-3, "unit":"€/kWh"},
 
-  "surcharges_electricity_default": {"value": "13*1e-3", "unit": "€/kWh"}
+  "surcharges_electricity_default": {"value": 13e-3, "unit": "€/kWh"}
 }

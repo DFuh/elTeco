@@ -13,6 +13,9 @@
   "choose_datasource":          {"selection":"default",
 
                                 "description": "default-> ? 0 -> 1 -> "},
+
+  "post_eeg": false,
+
   "include_costs_electricity":          true,
   "include_costs_capitalinvest":        true,
   "include_costs_maintenance":          true,
@@ -20,8 +23,8 @@
   "include_costs_texasandinsurances":   true,
   "include_costs_labor":                true,
   "include_costs_water":                true,
-
-  "revenue_oxygen": {"value": [1, 2, 3], "unit": "€/kg"},
+  "include_costs_external_compression": false,
+  "include_revenues_oxygen": false,
 
   "print_while_reading_flnm":   true,
   "print_while_reading_props":  true,

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 ### check script in spyder: test_class_materialbalance
+# TODO: implement variable for choosing state: STP, NTP, ...
 
 class MaterialBalance():
     ### basic parameters
@@ -32,7 +33,9 @@ class MaterialBalance():
     global R
     R = 8.314 # // in J/ mol K
 
+    global LHV_H2_m
     LHV_H2_m    = 33.32                # lower heating valuein kWh/kg
+    
 
     def __init__(self, T=None, p=None):
         if not T:
@@ -79,12 +82,14 @@ class MaterialBalance():
         df['dt_s'] = (df.date-df.date.shift(1)).dt.seconds #total_seconds()
         df['dt_hr'] = df.dt_s / 3600
         m_H2 = sum(df.n_H2_ca * df.dt_s * self.M_H2) # amount of produced Hydrogen // in kg
+        V_H2 = m_H2 / self.Hydrogen.rho
         m_O2 = sum(df.n_O2_an * df.dt_s * self.M_O2) # amount of produced Oxygen // in kg
+        V_O2 = m_O2 / self.Oxygen.rho
         m_H2O = sum( abs(df.n_H2O) * df.dt_s * self.M_H2O) # amount of consumed Water // in kg
 
         E_util = sum(df.P_act * df.dt_s) # amount of utilized energy // in kWh
         E_in = sum(df.P_in* df.dt_s) # amount of available energy from EE // in kWh
-
+        E_LHV_H2 = m_H2 * LHV_H2_m
         if stats:
             #TODO: distinguish between P_st and P_act !!!
             t_op_el = sum(np.where(df.P_act >0, 1,0) * df.dt_hr)# operation time of electrolyser
@@ -100,8 +105,8 @@ class MaterialBalance():
             t_op_gen = None # operation time of ee plant(s)
             t_fl_gen = None # full load hours of ee plant(s)
 
-        keys = 'year m_H2 m_O2 m_H2O E_util E_in t_op_el t_op_gen t_fl_el t_fl_gen'.split(' ')
-        vals = [yr, m_H2, m_O2, m_H2O, E_util, E_in, t_op_el, t_op_gen, t_fl_el, t_fl_gen]
+        keys = 'year E_LHV_H2 m_H2 V_H2 m_O2 V_O2 m_H2O E_util E_in t_op_el t_op_gen t_fl_el t_fl_gen'.split(' ')
+        vals = [yr, E_LHV_H2, m_H2, V_H2, m_O2, V_O2, m_H2O, E_util, E_in, t_op_el, t_op_gen, t_fl_el, t_fl_gen]
         mb_dct = {}
         for key, val in zip(keys, vals):
             mb_dct[key] = [val]
