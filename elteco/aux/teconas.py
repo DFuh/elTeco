@@ -9,6 +9,9 @@ import numpy as np
 #TODO: clc costs for clc_externalCompression
 #TODO: combine all years (e.g. wrt lifetime, etc)
 
+# TODO: insert economy of scale! (PROOST capex !!!)
+# TODO: CORRECT: tIns ->
+
 def run_teconas(self, ):
     bsc_par = self.par['basic']
     par_tec = self.par['teco_'+self.tec_el] #tec specific parameters | dict
@@ -206,10 +209,11 @@ def clc_strplCosts(self, bscpar, tecpar, mat, res, **kwargs):
 
 def clc_additionalCosts(self, bscpar, tecpar, mat, res):
     ### taxes and insurances
-    k_cap = res['capex_tot']
+    k_cap_tot = res['capex_tot']
     ccomp_tIns = bscpar['include_costs_texasandinsurances']
     tIns = tecpar['costs_taxesandinsurances']['value']
-    k_tIns = ccomp_tIns * tIns * k_cap
+    k_tIns = ccomp_tIns * tIns * k_cap_tot 
+    # DONE: tIns should not be applied to total (not annual) capex !
     res['taxesandinsurances_costs'] = k_tIns
 
     ### labor costs

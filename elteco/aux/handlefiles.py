@@ -36,7 +36,7 @@ class handleInputFiles():
         self.yr_cnt = 0
         self.basic_par = params['basic'] # basic parameter dict
         self.fllst = self.mk_fllst() # make list of files (fullpath) containing simudata or sigdata
-        print('----> fllst: ', self.fllst)
+        #print('----> fllst: ', self.fllst)
         self.def_dict = self.ini_dict()
         self.list_of_dicts = self.files_to_dicts(self.fllst)
         print('############### ----- created list of dicts...')
@@ -268,8 +268,12 @@ class handleInputFiles():
                 if not key:
                     fllst.append(fl)
                 elif len(key)>1:
-                    if key[num] in fl:
-                        fllst.append()
+                    for k in key:
+                        if k in fl
+                        fllst.append(fl)
+                    else:
+                        if key in fl:
+                            fllst.append(fl)
                 else:
                     if key in fl:
                         fllst.append(fl)
