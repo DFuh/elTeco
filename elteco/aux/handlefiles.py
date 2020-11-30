@@ -284,7 +284,7 @@ class handleInputFiles():
 
     def get_line(self, filepth, search_text='end Simu - metadata', num_end=100):
         '''
-        get line in csv, where ist says 'end info' (default)
+        get line in csv, contining the search-string (default)
         or any specified search text
         '''
         with open(filepth, 'r') as f:

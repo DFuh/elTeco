@@ -3,8 +3,8 @@ main script
 define classes for economical assessment and simulation results
 run tea
 '''
-from aux.mainclasses import elEco, elSimu
-import aux.handlefiles as hfs
+from aux.mainclasses import elEco#, elSimu
+#import aux.handlefiles as hfs
 '''
 def mainrun():
     tea_inst = elEco()

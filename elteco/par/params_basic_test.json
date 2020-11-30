@@ -1,18 +1,22 @@
 {
 
-  "directory_names": ["data/in"],
+  "directory_names": ["data/in/dftest"],
   "selection_keys": [],
   "file_format": [".csv"],
 
   "flnm_tearesults":            "teco_results_DATATIMESTAMP_TEC_SIG_SCL_",
   "flnm_materialbalance":       "materialbalance_results_DATATIMESTAMP_TEC_SIG_SCL_",
-  "dirname_data_location":      ["/home/dafu_res/0_modeling/Projects/EpoS/epos/data/out"],
-  "reference_dirname_dat_loc":  ["/home/dafu_res/0_modeling/Projects/EpoS/epos/data/out"],
+  "dirname_data_location":      ["/home/dafu_res/0_modeling/Projects/elTeco/elteco/data/in/dftest"],
+  "reference_dirname_dat_loc":  ["/home/dafu_res/0_modeling/Projects/elTeco/elteco/data/in"],
   "savedf_materialbalance":     true,
   "savedf_tearesults":          true,
   "choose_datasource":          {"selection":"default",
 
                                 "description": "default-> ? 0 -> 1 -> "},
+
+  "post_eeg": false,
+
+  "fitting_fnctn_capital_costs":         true,
   "include_costs_electricity":          true,
   "include_costs_capitalinvest":        true,
   "include_costs_maintenance":          true,
@@ -20,8 +24,8 @@
   "include_costs_texasandinsurances":   true,
   "include_costs_labor":                true,
   "include_costs_water":                true,
-
-  "revenue_oxygen": {"value": [1, 2, 3], "unit": "€/kg"},
+  "include_costs_external_compression": false,
+  "include_revenues_oxygen": false,
 
   "print_while_reading_flnm":   true,
   "print_while_reading_props":  true,

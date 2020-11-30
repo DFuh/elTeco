@@ -16,6 +16,7 @@
 
   "post_eeg": false,
 
+  "fitting_fnctn_capital_costs":         true,
   "include_costs_electricity":          true,
   "include_costs_capitalinvest":        true,
   "include_costs_maintenance":          true,

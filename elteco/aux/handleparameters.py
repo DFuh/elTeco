@@ -14,13 +14,14 @@ class handleParams():
     #TODO: enable parameter input via xls
     #TODO: add descriptive text in json files ?
 
-    def __init__(self, basepath):
+    def __init__(self, basepath, test=False):
         self.lst_parfiles = glob.glob(basepath+'/par/*.json')
 
         #print(self.lst_parfiles)
         self.print_filelist(self.lst_parfiles, name='Parameter')
-        self.parameter_version = self.select_par_version()
-        self.dct = self.read_params(basepath)
+        if not test:
+            self.parameter_version = self.select_par_version()
+        self.dct = self.read_params(basepath, test)
 
         print(" --- finished parameter reading --- ")
 
@@ -36,7 +37,7 @@ class handleParams():
 
 
     def select_par_version(self):
-
+        
         vers_input = input('Insert parameter version to be used: [integer/key] (any key -> default)')
 
         try:
@@ -48,7 +49,7 @@ class handleParams():
         return version
 
 
-    def read_params(self,pth0):
+    def read_params(self,pth0, test):
         '''
         read parameter files based on version
         '''
@@ -62,7 +63,9 @@ class handleParams():
                     'external_scenario']
         #for dfi, pthi in
 
-        if not self.parameter_version:
+        if test:
+            suffix = '_test.json'
+        elif not self.parameter_version:
             suffix = '_default.json'
         else:
             suffix = '_v' + self.parameter_version + '.json'

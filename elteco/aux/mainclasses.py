@@ -37,7 +37,7 @@ print('M: ', __name__)
 class elEco():
     """main class elEco."""
 
-    def __init__(self, *args, basepath=None):
+    def __init__(self, *args, basepath=None, test=False):
 
         #super(elEco, self).__init__()
         #self.arg = arg
@@ -50,7 +50,7 @@ class elEco():
             self.basepath = basepath
         #print('current working directory: ', self.basepath)
         #TODO: decide, wether df or dict ! # currently Params -> dict
-        self.parameters = hp.handleParams(self.basepath) # read parameters, return dict
+        self.parameters = hp.handleParams(self.basepath, test=test) # read parameters, return dict
         self.inFls = hf.handleInputFiles(self.basepath, self.parameters.dct)
 
         self.simuinst = self.make_simu_instances()

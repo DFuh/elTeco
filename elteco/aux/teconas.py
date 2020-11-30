@@ -19,7 +19,6 @@ def run_teconas(self, ):
     par_elec = self.par['electricity_costs']
 
 
-
     for yr, mb_yr in matbal.items():
         tea_res = {}
         econ(self, bsc_par, par_tec, par_elec, mb_yr, tea_res)
@@ -110,7 +109,15 @@ def clc_auxVal(self, bscpar, tecpar, mat, res):
     tau = tecpar['lifetime_electrolyser']['value']  # // in a
     Af = ( i_r * (i_r + 1)**tau ) / ( ( ( i_r + 1 )**tau ) - 1 )
     #print('Af:', Af) # ~0.08 (tau=20a, iR=5%)
-    aC = tecpar['costs_plantacquisition']['value'] # Acquisition costs of plant
+
+
+    use_fitfun =
+    if bscpar['fitting_fnctn_capital_costs']: # use fitting function for capex calc
+        aC = capex_fit(P_in, tecpar)
+    else:
+        # use fixed parameter value as capex
+        aC = tecpar['costs_plantacquisition']['value'] # Acquisition costs of plant
+
     frc_StAcq = tecpar['fraction_stackacquisition_pacq']['value'] # Fraction of Stack acquisit.costs wrt plant
     StC_bare = aC * frc_StAcq         # Bare Stack costs
     res['capital_costs_stack'] = StC_bare
@@ -131,6 +138,56 @@ def clc_auxVal(self, bscpar, tecpar, mat, res):
     res['capex_tot'] = capex_tot
     return capex_tot
 
+
+def capex_fit(P_in, tecpar):
+    '''
+    use capex-function, fitted from Proost 2019
+
+    '''
+    # TODO: external script for different capex-functions
+    def ffun(p_in, a, b, c):
+        '''
+        fitted function based on Proost 2019
+        '''
+        return a * np.exp(b/p_in) + (c*p_in)
+
+    cfpar = tecpar['capex_curve_fit']
+    p_llmt = cfpar['lower_limit_power']
+    k_llmt = cfpar['lower_limit_costs']
+    #llmt = [2.1, 0.7] # Lower limit of plant power // in MW
+    #k_lmt = [400, 545] # Lower limit of specific investment cost in €/MW
+    #linf = [[[0.4,2000],[2,500]], [[0.2,3000],[0.6,2000]]] # Linear fit for AEL linf[0] and PEM linf[1] in low power range
+    pow_lo = cfpar['fitting_factors_lin']['lower_limit_power']
+    pow_hi = cfpar['fitting_factors_lin']['upper_limit_power']
+    cost_lo = cfpar['fitting_factors_lin']['lower_limit_costs']
+    cost_hi = cfpar['fitting_factors_lin']['upper_limit_costs']
+
+    if P_in < p_llmt:
+        # linear fit for low power values
+        k_spec = P_in * ( (cost_hi - cost_lo) / (pow_hi - pow_lo) ) + cost_lo
+        # TODO: check: what about add_klim for AEL ???
+    else:
+        # curve fit
+        coeffs = cfpar['fitting_coeff_crv'] 
+        k_spec = efun(P_in,*coeffs)
+
+    # Extracted values from Proost2019 (Figure 4)
+    # Might be checked...
+    #aa,bb,cc = np.array([   [582.609751, 0.367851704, -1.03609829], # AEL
+    #                         [737.069812, 0.375146694, -13.7710513] # PEM
+    #                     ])[tec]
+    # Linear regression in low power range
+    #if P_in < llmt[tec]:
+    #    k_spec = P_in*((linf[tec][0][1]-linf[tec][1][1]) / (linf[tec][0][0]-linf[tec][1][0]))+linf[tec][0][1]
+    #    #print('P_in:',P_in,'k_spec',k_spec)
+    #    add_klmt_ael = 689 # additional lower cost limit for AEL, based on Fig 3 (bend between single and multistack (?))
+    #    if (tec == 0) & (k_spec < add_klmt_ael):
+    #        k_spec = add_klmt_ael
+    #else:
+    #    k_spec = efun(P_in,aa,bb,cc) # Calc specific cost based on fitted function
+    if k_spec < k_lmt: # Apply lower cost limit
+        k_spec = k_lmt
+    return k_spec
 
 def clc_capitalCosts(self, bscpar, tecpar, mat, res):
     ### CAPEX
@@ -212,7 +269,7 @@ def clc_additionalCosts(self, bscpar, tecpar, mat, res):
     k_cap_tot = res['capex_tot']
     ccomp_tIns = bscpar['include_costs_texasandinsurances']
     tIns = tecpar['costs_taxesandinsurances']['value']
-    k_tIns = ccomp_tIns * tIns * k_cap_tot 
+    k_tIns = ccomp_tIns * tIns * k_cap_tot
     # DONE: tIns should not be applied to total (not annual) capex !
     res['taxesandinsurances_costs'] = k_tIns
 
