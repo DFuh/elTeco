@@ -37,7 +37,7 @@ class handleParams():
 
 
     def select_par_version(self):
-        
+
         vers_input = input('Insert parameter version to be used: [integer/key] (any key -> default)')
 
         try:
@@ -53,6 +53,7 @@ class handleParams():
         '''
         read parameter files based on version
         '''
+        #TODO: read external scenario file, only when necessary !
 
         #df_par = []#[df_bscpar, df_ecpar, df_tecopar_ael, df_tecopar_pem]
         dct_par = {}
@@ -60,6 +61,7 @@ class handleParams():
                     'electricity_costs',
                     'teco_AEL',
                     'teco_PEM',
+                    'teco_storage',
                     'external_scenario']
         #for dfi, pthi in
 

@@ -35,9 +35,11 @@ class MaterialBalance():
 
     global LHV_H2_m
     LHV_H2_m    = 33.32                # lower heating valuein kWh/kg
-    
+    global HHV_H2_m
+    HHV_H2_m    = 39.4                # lower heating valuein kWh/kg
 
-    def __init__(self, T=None, p=None):
+    def __init__(self, simu_obj, T=None, p=None):
+        self.simu_obj = simu_obj
         if not T:
             self.T = self.T0
         if not p:
@@ -53,9 +55,15 @@ class MaterialBalance():
         input data must contain:
         date        | n_H2      | n_O2      | n_H2O     | P_in   | P_act
         pd.datetime | in mol/s  | in mol/s  | in mol/s  | in kW  |  in kW
-        '''
-        val_nms = ['n_H2_ca','n_O2_an','n_H2O','P_in','P_act']
 
+                        ...| P_cmp (opt) | c_E_spot (opt)   | f_emiss_spc (opt)
+                        ...| in kW       | in  €/kWh        | in g/kWh (CO2eq.)
+
+        '''
+        val_nms = ['n_H2_ca','n_O2_an','n_H2O_cns','P_in','P_act',
+                    'P_cmp', 'c_electr', 'f_emiss_spc']
+        opt_nms = [False,       False,  False,      False, False,
+                    True, True, True]
         for nm in val_nms:
             while(not nm in df.columns):
                 print(f'...data-df does not contain column: {nm}')
@@ -63,9 +71,12 @@ class MaterialBalance():
                 cnm = input('Insert column name to be used: ')
                 if cnm:
                     df.rename(columns = {cnm:nm}, inplace = True)
+                elif (cnm =='') or opt_nms[val_nms.index(nm)]:
+                    break
                 else:
-                    print('Could not progress df finally... abort...')
+                    print('Could not process df finally... abort...')
                     return None
+
         return df
 
 
@@ -79,17 +90,48 @@ class MaterialBalance():
         #df = df.reset_index()
         #print('df.head: ', df.head())
         #df['dt_s'] = (df.index - df.index.shift(1)).dt.seconds #(df.date-df.date.shift(1)).dt.seconds #total_seconds()
-        df['dt_s'] = (df.date-df.date.shift(1)).dt.seconds #total_seconds()
+
+        ### Include energy prices and cO2-emissionfactors
+
+
+        # df['dt_s'] = (df.date-df.date.shift(1)).dt.seconds #total_seconds()
+        df['dt_s'] = df.t_diff
         df['dt_hr'] = df.dt_s / 3600
         m_H2 = sum(df.n_H2_ca * df.dt_s * self.M_H2) # amount of produced Hydrogen // in kg
         V_H2 = m_H2 / self.Hydrogen.rho
         m_O2 = sum(df.n_O2_an * df.dt_s * self.M_O2) # amount of produced Oxygen // in kg
         V_O2 = m_O2 / self.Oxygen.rho
-        m_H2O = sum( abs(df.n_H2O) * df.dt_s * self.M_H2O) # amount of consumed Water // in kg
+        m_H2O = sum( abs(df.n_H2O_cns) * df.dt_s * self.M_H2O) # amount of consumed Water // in kg
 
-        E_util = sum(df.P_act * df.dt_s) # amount of utilized energy // in kWh
-        E_in = sum(df.P_in* df.dt_s) # amount of available energy from EE // in kWh
+        m_H2_ext = sum(df.dm_H2_ext * df.dt_s)
+
+        print(df.P_in.head(5))
+        print(df.P_act.head(5))
+        arr_E_util = df.P_act * df.dt_hr
+        E_util = sum(arr_E_util) # amount of utilized energy // in kWh
+
+        E_in = sum(df.P_in* df.dt_hr) # amount of available energy from EE // in kWh
+
+        # TODO: Include compressor-efficiency ?
+        # eff_cmp = f(P_cmp)
+        arr_E_cmp = df.P_cmp * df.dt_hr
+        E_cmp = sum(arr_E_cmp)
+
+        bsc_par = self.simu_obj.par['basic']
+        cE_util = bsc_par.get('column_name_electricity_costs_E_util', False)
+        f_emiss_util = bsc_par.get('column_name_emission_factor_E_util', False)
+        cE_cmp = bsc_par.get('column_name_electricity_costs_E_cmp', False)
+        f_emiss_cmp = bsc_par.get('column_name_emission_factor_E_cmp', False)
+        CE_util = sum(arr_E_util * df[cE_util]) if cE_util in df.columns else 0
+        CE_cmp = sum(arr_E_cmp * df[cE_cmp]) if cE_cmp in df.columns else 0
+        emiss_E_util = sum(arr_E_util * df[f_emiss_util]) if f_emiss_util in df.columns else 0
+        emiss_E_cmp = sum(arr_E_cmp * df[f_emiss_cmp]) if f_emiss_cmp in df.columns else 0
+
+
+
         E_LHV_H2 = m_H2 * LHV_H2_m
+        E_HHV_H2 = m_H2 * HHV_H2_m
+
         if stats:
             #TODO: distinguish between P_st and P_act !!!
             t_op_el = sum(np.where(df.P_act >0, 1,0) * df.dt_hr)# operation time of electrolyser
@@ -105,13 +147,17 @@ class MaterialBalance():
             t_op_gen = None # operation time of ee plant(s)
             t_fl_gen = None # full load hours of ee plant(s)
 
-        keys = 'year E_LHV_H2 m_H2 V_H2 m_O2 V_O2 m_H2O E_util E_in t_op_el t_op_gen t_fl_el t_fl_gen'.split(' ')
-        vals = [yr, E_LHV_H2, m_H2, V_H2, m_O2, V_O2, m_H2O, E_util, E_in, t_op_el, t_op_gen, t_fl_el, t_fl_gen]
+        keys = ('year E_HHV_H2 E_LHV_H2 m_H2 V_H2 m_H2_ext m_O2 V_O2 m_H2O E_util E_in E_cmp'
+                +' CE_util CE_cmp emiss_E_util emiss_E_cmp'
+                +' t_op_el t_op_gen t_fl_el t_fl_gen')
+        vals = [yr, E_HHV_H2, E_LHV_H2, m_H2, V_H2, m_H2_ext, m_O2, V_O2, m_H2O, E_util, E_in, E_cmp,
+                    CE_util, CE_cmp, emiss_E_util, emiss_E_cmp,
+                    t_op_el, t_op_gen, t_fl_el, t_fl_gen]
         mb_dct = {}
-        for key, val in zip(keys, vals):
+        for key, val in zip(keys.split(' '), vals):
             mb_dct[key] = [val]
-
-        #print('mb_dict: ', mb_dct)
+        print(df.head())
+        print('mb_dict: ', mb_dct)
         mb_df = pd.DataFrame.from_dict(mb_dct)
         return mb_df
 

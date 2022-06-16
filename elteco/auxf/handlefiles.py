@@ -6,6 +6,7 @@ import glob
 import os
 import collections
 import json
+import numpy as np
 import pandas as pd
 import tkinter
 ###
@@ -30,16 +31,27 @@ print('cwd: ', os.getcwd())
 class handleInputFiles():
     """ main handling of files
     """
-    def __init__(self, basepath, params):
+    def __init__(self, basepath, params, pth_data_loc=None):
 
         self.basepath = basepath
         self.yr_cnt = 0
         self.basic_par = params['basic'] # basic parameter dict
-        self.fllst = self.mk_fllst() # make list of files (fullpath) containing simudata or sigdata
-        #print('----> fllst: ', self.fllst)
-        self.def_dict = self.ini_dict()
-        self.list_of_dicts = self.files_to_dicts(self.fllst)
+        if not pth_data_loc:
+            self.dir_data_input = self.basic_par['dirname_data_location']
+        else:
+            self.dir_data_input = pth_data_loc
+        self.fllst = self.mk_fllst_walk([self.dir_data_input])
+
+        # self.fllst = self.mk_fllst() # make list of files (fullpath) containing simudata or sigdata
+        print('----> fllst: ', self.fllst)
+
+        self.dct_props = extr_data_properties(self.fllst) # |l. 764
+        # self.list_of_dicts =
+        # self.def_dict = self.ini_dict()
+        # self.list_of_dicts = self.files_to_dicts(self.fllst)
         print('############### ----- created list of dicts...')
+
+
         #print(self.list_of_dicts)
         #
         #self.merge_dicts()
@@ -85,9 +97,12 @@ class handleInputFiles():
     def mk_fllst(self, single_dir=True):
         # single or multiple ?
         # select source
-        fllst_raw = self.search_files(dirnms = self.basic_par['directory_names'],
-                                        key = self.basic_par['selection_keys'])
+        # fllst_raw = self.search_files(dirnms = self.basic_par['directory_names'],
+        #                                 key = self.basic_par['selection_keys'])
+        fllst_raw = self.search_files(dirnms = self.basic_par['dirname_data_location'],
+                                         key = self.basic_par['selection_keys'])
 
+        fllst_raw.sort()
         if not self.basic_par['manual_file_selection']:
             return fllst_raw
         else: #(additional) manual selection
@@ -132,13 +147,17 @@ class handleInputFiles():
         list_of_dicts = []
 
         for fl in fllst: # fllst contains full paths
-            dct, df_skpr = self.read_specs(fl)
+            dct, dff = self.read_data_df(fl, ini=True)
+            # dct, df_skpr = self.read_specs(fl)
             #print('df_skpr: ', df_skpr)
             #dct['df'] = pd.read_csv(fl,skiprows=(df_skpr), parse_dates=[0])
-            df = pd.read_csv(fl,skiprows=(df_skpr), index_col=[0])
+            # dff = pd.read_csv(fl,skiprows=(df_skpr), index_col=[0], nrows=10) # REad only slice of df (read in full df later in simuinst)
+            dfu = dff[dff.index == 'units']
+            df = dff[dff.index !='units']
             #print('df: ', df.head())
-            #df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d HH:%MM:%SS')
-            df['date'] = pd.to_datetime(df['date'],unit='ns')
+            # df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d HH:%MM:%SS')
+            # print(df.head(4))
+            # df['Date'] = pd.to_datetime(df['Date'],unit='ns')
             dct['df'] = df
             dct['file'] = fl
             list_of_dicts.append(dct)
@@ -240,6 +259,34 @@ class handleInputFiles():
         return lod_out
     '''
 
+    def mk_fllst_walk(self,pth):
+
+
+        # fl_dct = {}
+        fllst = []
+        for pthi in pth:
+            print('pthi (fllst_walk): ', pthi)
+            for root, dirs, files in os.walk(pthi):
+                for dirn in dirs:
+                    npth = os.path.join(root, dirn)
+                    print('npth: ', npth)
+                    parfiles = mk_filelist(npth, sffx='.json')
+                    fllst += parfiles
+                for file in files:
+                    fpth = os.path.join(root, file)
+                    print('fpth: ', fpth)
+                    #parfiles = mk_filelist(fpth, sffx='.json')
+                    flnm = os.path.basename(file)
+                    if ('parameters' in flnm) & ('.json' in flnm):
+                        fllst.append(fpth) #parfiles
+                    # dct = extr_data_properties(parfiles) # |l. 764
+                    # fl_dct.update(dct)
+        fllst_o = self.unique_list(fllst)
+        return fllst_o
+
+
+
+
     def search_files(self, dirnms=None, key=None):
         '''
         check different locations for files to use
@@ -269,8 +316,8 @@ class handleInputFiles():
                     fllst.append(fl)
                 elif len(key)>1:
                     for k in key:
-                        if k in fl
-                        fllst.append(fl)
+                        if k in fl:
+                            fllst.append(fl)
                     else:
                         if key in fl:
                             fllst.append(fl)
@@ -280,140 +327,10 @@ class handleInputFiles():
 
         return fllst # return list of files in dir (fullpath)
 
+
 #############################################################
 
-    def get_line(self, filepth, search_text='end Simu - metadata', num_end=100):
-        '''
-        get line in csv, contining the search-string (default)
-        or any specified search text
-        '''
-        with open(filepth, 'r') as f:
-            for num, line in enumerate(f,1):
-                if search_text in line:
-                    return num
-                if num > num_end:
-                    return None
 
-
-    def read_specs(self, filepth, ):
-        '''
-        read files and extract specs, data
-
-        -- check, if matbal exists
-        '''
-        filename = os.path.splitext(os.path.basename(filepth))[0]
-        skpl = self.get_line(filepth, search_text='begin Simu - metadata') # get last line (number) of specs
-        line = self.get_line(filepth) # get last line (number) of specs
-        df_sl = self.get_line(filepth, search_text='begin Simu - data') # number of lines to skip for df reading
-        #print('line: ', line)
-        #print('skpl: ', skpl)
-        if line:
-            d_in = pd.read_csv(filepth, index_col=0,skiprows=skpl, nrows=line-skpl-1, header=None).T.to_dict('records')[0]
-            d_specs = {}
-            for key, val in d_in.items():
-                #print('key:', key)
-                strpkey = key.strip()
-                #print('strpkey: ', strpkey)
-                #print('strpval: ', val.strip())
-                #if strpkey != key:
-                #del d_specs[key]
-                #d_specs[strpkey] = val.strip()
-                d_specs[strpkey] = val.strip()
-            ### -> reading data only, if not matbal (in elSimu-instances)
-            df_data = None #pd.read_csv(filepth, index_col=0, skiprows=line)
-            #tag = d['tag']
-            #full_dict = d_spec.copy()
-            #full_dict['dfs']
-        else:
-            # no specs in csv
-            '''
-            str_elem = filename.split('_') # split by _
-            if str_elem[-1] != '':  # if last char is '_', last elem in list will be ''
-                strn = -1
-            else:
-                strn = -2
-            ### CAUTION: find returns ambigous vals e.g. with dates
-            #tag = filename[:filename.find(str_elem[strn])] #use filename without yr-string as tag
-            '''
-            print('CAUTION: hardcoded filename-splitting')
-            tag = filename[:51]
-            print('---<->>>>> filename[:-51]: ', filename[:-51])
-
-            lst = []
-            gen_tec_keys = ['WEA', 'PV']
-            sig_subkeys = ['off', 'on']
-            gen_plant_type = None #?
-            tec_keys = ['PEM', 'AEL']
-            npf_keys = ['04', '06', '08']
-            nomp_keys = ['']
-            searchlist = [gen_tec_keys, tec_keys, npf_keys, nomp_keys]
-            key_lst = ['gen_tec', 'el_tec', 'scl', 'nomp']
-            #TODO: d_speca from defaultdict?
-            d_specs = self.def_dict.copy()
-            #print('d_specs:', d_specs)
-            d_specs['tag'] = tag
-            for s_key, keylst in zip(key_lst, searchlist):
-                for key in keylst:
-                    if key in filename:
-                        d_specs[s_key] = key
-
-            #d_specs = self.specs_from_flnm()
-            #TODO: check, if full reading can be avoided
-            df_data = pd.read_csv(filepth)
-            #print(df_data.head())
-            #TODO: check year in datetime column
-            cols = df_data.columns
-
-            for cnm in cols:
-                if 'Unnamed' in cnm:
-                    df_data = df_data.drop(cnm, 1)
-                if ('date' in cnm.lower()) or ('datum' in cnm.lower()):
-                    #yr = df_data[cnm].dt.to_period('Y') # does not return single value
-                    y = [x.year for x in df_data[cnm].dt.to_period('Y').tolist()]
-                else:
-                    print('no specs of date in df...')
-                    y = str(self.yr_cnt)
-                    self.yr_cnt += 1
-
-            y_un = self.unique_list(y) # return unique objects
-            if len(y_un)>1:
-                print('more than 1 year in df....????')
-                print('file:', filename)
-                d_specs = None
-            else:
-                    #df_data.time.dt.to_period('Y')
-                yr_strng = str(y_un)
-                d_specs['name'] = filename # remove yr-ending (int)?
-                d_specs['yrs'] = yr_strng #[yr_strng]
-                d_specs['files'] = os.path.basename(filepth) #{yr_strng : filename}
-                d_specs['dfs'] = df_data #{yr_strng : df_data}
-            #print('d_specs', d_specs)
-            d_specs['full_flpth'] = filepth
-        return d_specs, df_sl#, df_data
-
-
-
-
-
-        '''
-        def check_multiyr(self, fllst, sep='_', num=1):
-            ''''''
-            check, if multi-year file set exists
-            and
-            ''''''
-
-            multi_yr = []
-            for fl in fllst:
-                fflnm = os.path.splitext(fl)[0]
-                splt = fflnm.rsplit(sep, num)
-                while not splt[-1]:
-                    num += 1
-                    splt = fflnm.rsplit(sep, num)
-                #[flnm, yr] = splt
-                multi_yr.append(splt)
-                num = 1
-            return multi_yr
-        '''
 #######################################
     def file_path(self, ):
 
@@ -727,6 +644,114 @@ class handleInputFiles():
         df.columns = new_cols
         return df
 
+################################################################################
+
+def extr_data_properties(parfiles):
+    '''
+    read parfiles and collect data/properties accordingly
+    '''
+    prop_dct={}
+    for pfl in parfiles:
+        dct = {}
+        dct['flnm_prms']=pfl
+        ppth = os.path.dirname(pfl)
+        # prm = rf.read_json_file(pfl)
+        with open(pfl) as jsonfile:
+            prm0=json.load(jsonfile)
+        tag = prm0.get('tag_sim', None)
+        if tag is not None:
+            prm = prm0.get('parameters', {})
+            dct['prm0'] = prm0
+            dct['pth_out'] = ppth
+            dct['name'] = prm.get('scen_name', None)
+            dct['pth_sig'] = prm.get('relpth_sig_data', None)    # Path to Sig-File
+            bsc_par = prm.get('bsc_par', None)
+            if bsc_par is not None:
+                dct['tec_el'] = bsc_par.get('tec_el', None)    # electrolysis technology
+                dct['tec_gen'] = bsc_par.get('tec_ee', None)    # RE technology
+
+                dct['rpow_el'] = bsc_par.get('rpow_el', None)     # nominal power of electrolysis plant
+                dct['rpow_gen'] = bsc_par.get('rpow_ee', None)     # nominal power of re plant
+                # 'npf': None,    # fraction of nominal renewable power input
+            #'files': None,
+            dct['res_lst'] = mk_filelist(ppth, skey=tag+'*results*',  sffx='.csv')
+            dct['matbal_lst'] = mk_filelist(ppth, skey=tag+'*matbal*',  sffx='.csv')
+            dct['else_lst'] = mk_filelist(ppth, skey=tag+'*',
+                                            sffx='.csv',
+                                            exclude=['matbal','results'])
+            ## read df-heads
+            spc_lst = []
+            df_lst = []
+            for fl in dct['res_lst']:
+                specs,df = read_data_df(fl,ini=True)
+                spc_lst.append(specs)
+                df_lst.append(df)
+            dct['res_specs'] = spc_lst
+            # dct['res_df'] = spc_lst
+            dct['years'] = get_simu_years(prm)
+            dct['files'] = dict(zip(dct['years'],dct['res_lst']))
+            prop_dct[tag]=dct
+    return prop_dct
+
+def mk_filelist(pth, skey=None, primwc=False, sffx='', exclude=[]):
+
+    if skey is None:
+        skey='*'
+    if sffx is not None:
+        skey += sffx
+    if primwc:
+        skey =  '*'+skey
+    spth = os.path.join(pth,skey)
+    print('spth: ', spth)
+    fllst = glob.glob(spth)
+    print('fllst (mk_filelist(0): ', fllst)
+    lst_o = []
+    for fl in fllst:
+        if exclude:
+            for key in exclude:
+                if key not in fl:
+                    lst_o.append(fl)
+        else:
+            lst_o.append(fl)
+        # lst_o += [fl for key in exclude if key not in fl]
+    print('fllst (mk_filelist(1): ', lst_o)
+    return lst_o
+
+def get_simu_years(prms):
+    '''
+    Extract years of actual simulation
+    either from actual dates,
+    or from parameters (main or sig-metadata)
+    '''
+
+    dates = []
+    # prms = dct_par.get('parameters', None)
+    if prms is not None:
+        sig_med = prms.get('metadata_sig', None)
+        sd_sig = sig_med.get('start_date', None)
+        ed_sig = sig_med.get('end_date', None)
+    sd_main = prms.get('date_start', None)
+    ed_main = prms.get('date_end', None)
+    sd_act = prms.get('date_start_act', None)
+    ed_act = prms.get('date_end_act', None)
+    if (sd_act is None):
+        sd_lst = [date for date in [sd_sig, sd_main] if date is not None]
+        sd_lst.sort()
+        sd_act = sd_lst[0]
+    if (ed_act is None):
+        ed_lst = [date for date in [ed_sig, ed_main] if date is not None]
+        ed_lst.sort()
+        ed_act = ed_lst[0]
+    yr_s = pd.to_datetime(sd_act).year
+    yr_e = pd.to_datetime(ed_act).year
+    if yr_s < yr_e:
+        yrs = list(np.arange(yr_s, yr_e+1))
+    elif yr_s > yr_e:
+        yrs = list(np.arange(yr_e, yr_s+1))
+    else:
+        yrs = [yr_s]
+    return yrs
+
 def mk_abspath(basepath='', tar='', cat=None):
 
     if tar[0]=='/':
@@ -759,6 +784,183 @@ def df_to_dct(df_in, idx_col=None):
     list(df_in.itertuples(name='Row', index=False))
 
     return
+
+
+def input_scen_file(self,):
+    ### select paths to search in
+    pths = [os.path.dirname(self.fllst[0])]
+    if not self.par['basic']['root_dir_of_files']:
+        pths.append('/')
+    else:
+        pths.append(self.par['basic']['root_dir_of_files'])
+    res = find_files(self.tag, pths)
+    lst = []
+    for fl in res:
+        if '_parameters' in fl:
+            lst.append(fl)
+
+    if len(lst) >1:
+        idx = input(f'Which of the following scenario-files is valid? {lst}')
+    else:
+        idx = 0
+    try:
+        with open(lst[int(idx)]) as jsonfile:
+            data=json.load(jsonfile)
+    except:
+        data = None
+
+    return data
+
+def find_files(search_key, paths=[]):
+    for pth in paths:
+        result = []
+        for root, dirs, files in os.walk(pth):
+            #print(root, dirs, files)
+            for fl in files:
+                if search_key in fl:
+                    result.append(os.path.join(root,fl))
+    return result
+
+def read_data_df(fl, ini=False):
+    print('Reading file: ', fl)
+    dct, df_skpr = read_specs(fl)
+    print('df_specs: ', dct)
+    print('df_skpr: ', df_skpr)
+    #dct['df'] = pd.read_csv(fl,skiprows=(df_skpr), parse_dates=[0])
+    if ini:
+        dff = pd.read_csv(fl,skiprows=(df_skpr), index_col=[0], nrows=10) # REad only slice of df (read in full df later in simuinst)
+    else:
+        dff = pd.read_csv(fl,skiprows=(df_skpr), index_col=[0])
+    return dct, dff
+
+def read_specs(filepth):
+    '''
+    read files and extract specs, data
+
+    -- check, if matbal exists
+    '''
+    filename = os.path.splitext(os.path.basename(filepth))[0]
+    skpl = get_line(filepth, search_text='begin Simu - metadata') # get last line (number) of specs
+    line = get_line(filepth) # get last line (number) of specs
+    df_sl = get_line(filepth, search_text='begin Simu - data') # number of lines to skip for df reading
+    print('line: ', line)
+    print('skpl: ', skpl)
+    if line:
+        d_in = pd.read_csv(filepth, index_col=0,skiprows=skpl, nrows=line-skpl-1, header=None).T.to_dict('records')[0]
+        d_specs = {}
+        for key, val in d_in.items():
+            #print('key:', key)
+            strpkey = key.strip()
+            #print('strpkey: ', strpkey)
+            #print('strpval: ', val.strip())
+            #if strpkey != key:
+            #del d_specs[key]
+            #d_specs[strpkey] = val.strip()
+            if isinstance(val, str):
+                d_specs[strpkey] = val.strip()
+        ### -> reading data only, if not matbal (in elSimu-instances)
+        df_data = None #pd.read_csv(filepth, index_col=0, skiprows=line)
+        #tag = d['tag']
+        #full_dict = d_spec.copy()
+        #full_dict['dfs']
+    else:
+        # no specs in csv
+        '''
+        str_elem = filename.split('_') # split by _
+        if str_elem[-1] != '':  # if last char is '_', last elem in list will be ''
+            strn = -1
+        else:
+            strn = -2
+        ### CAUTION: find returns ambigous vals e.g. with dates
+        #tag = filename[:filename.find(str_elem[strn])] #use filename without yr-string as tag
+        '''
+        print('CAUTION: hardcoded filename-splitting')
+        tag = filename[:51]
+        print('---<->>>>> filename[:-51]: ', filename[:-51])
+
+        lst = []
+        gen_tec_keys = ['WEA', 'PV']
+        sig_subkeys = ['off', 'on']
+        gen_plant_type = None #?
+        tec_keys = ['PEM', 'AEL']
+        npf_keys = ['04', '06', '08']
+        nomp_keys = ['']
+        searchlist = [gen_tec_keys, tec_keys, npf_keys, nomp_keys]
+        key_lst = ['gen_tec', 'el_tec', 'scl', 'nomp']
+        #TODO: d_speca from defaultdict?
+        d_specs = self.def_dict.copy()
+        #print('d_specs:', d_specs)
+        d_specs['tag'] = tag
+        for s_key, keylst in zip(key_lst, searchlist):
+            for key in keylst:
+                if key in filename:
+                    d_specs[s_key] = key
+
+        #d_specs = self.specs_from_flnm()
+        #TODO: check, if full reading can be avoided
+        df_data = pd.read_csv(filepth)
+        #print(df_data.head())
+        #TODO: check year in datetime column
+        cols = df_data.columns
+
+        for cnm in cols:
+            if 'Unnamed' in cnm:
+                df_data = df_data.drop(cnm, 1)
+            if ('date' in cnm.lower()) or ('datum' in cnm.lower()):
+                #yr = df_data[cnm].dt.to_period('Y') # does not return single value
+                y = [x.year for x in df_data[cnm].dt.to_period('Y').tolist()]
+            else:
+                print('no specs of date in df...')
+                y = str(self.yr_cnt)
+                self.yr_cnt += 1
+
+        y_un = self.unique_list(y) # return unique objects
+        if len(y_un)>1:
+            print('more than 1 year in df....????')
+            print('file:', filename)
+            d_specs = None
+        else:
+                #df_data.time.dt.to_period('Y')
+            yr_strng = str(y_un)
+            d_specs['name'] = filename # remove yr-ending (int)?
+            d_specs['yrs'] = yr_strng #[yr_strng]
+            d_specs['files'] = os.path.basename(filepth) #{yr_strng : filename}
+            d_specs['dfs'] = df_data #{yr_strng : df_data}
+        #print('d_specs', d_specs)
+        d_specs['full_flpth'] = filepth
+    return d_specs, df_sl#, df_data
+
+def get_line(filepth, search_text='end Simu - metadata', num_end=100):
+    '''
+    get line in csv, containing the search-string (default)
+    or any specified search text
+    '''
+    with open(filepth, 'r') as f:
+        for num, line in enumerate(f,1):
+            if search_text in line:
+                return num
+            if num > num_end:
+                return None
+
+    '''
+    def check_multiyr(self, fllst, sep='_', num=1):
+        ''''''
+        check, if multi-year file set exists
+        and
+        ''''''
+
+        multi_yr = []
+        for fl in fllst:
+            fflnm = os.path.splitext(fl)[0]
+            splt = fflnm.rsplit(sep, num)
+            while not splt[-1]:
+                num += 1
+                splt = fflnm.rsplit(sep, num)
+            #[flnm, yr] = splt
+            multi_yr.append(splt)
+            num = 1
+        return multi_yr
+    '''
 
 class handleOutputFiles():
 
