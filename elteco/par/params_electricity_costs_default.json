@@ -1,8 +1,29 @@
 {
   "nosurch_spec_costs_electricity_pv":    {"value":45e-3, "unit":"€/kWh"},
-  "nosurch_spec_costs_electricity_wind_offshore":  {"value":154e-3, "unit":"€/kWh"},
-  "nosurch_spec_costs_electricity_wind_onshore_peeg": {"value":45e-3, "unit":"€/kWh"},
+  "nosurch_spec_costs_electricity_wind_offshore":  {"value":72.3e-3, "unit":"€/kWh"},
+  "nosurch_spec_costs_electricity_wind_onshore_peeg": {"value":39.4e-3, "unit":"€/kWh"},
   "nosurch_spec_costs_electricity_wind_onshore": {"value":93e-3, "unit":"€/kWh"},
+  "nosurch_spec_costs_WEC_PowerSyn": {"value":72.3e-3, "unit":"€/kWh"},
+  "nosurch_spec_costs_grid2021_JF2022_base": {"value":88.42e-3, "unit":"€/kWh"},
 
-  "surcharges_electricity_default": {"value": 13e-3, "unit": "€/kWh"}
+  "EXCLUDED_surcharges_electricity_default": {"value": 13e-3, "unit": "€/kWh"},
+  "surcharges_electricity_default": {"2015": {"value": 1.09695e-2, "unit": "€/kWh"},
+                                    "2016":{"value": 1.16085e-2, "unit": "€/kWh"},
+                                    "2017":{"value": 1.2345e-2, "unit": "€/kWh"},
+                                    "2018":{"value": 1.2221e-2, "unit": "€/kWh"},
+                                    "2019":{"value": 1.20515e-2, "unit": "€/kWh"},
+                                    "2020":{"value": 1.2517e-2, "unit": "€/kWh"},
+                                    "2021":{"value": 1.21635e-2, "unit": "€/kWh"},
+                                    "2022":{"value": 0.816e-2, "unit": "€/kWh"}},
+
+  "surcharges_electricity_1gwh_default":
+                                    {"2015":{"value": 0.481e-2, "unit": "€/kWh"},
+                                    "2016":{"value": 0.823e-2, "unit": "€/kWh"},
+                                    "2017":{"value": 0.826e-2, "unit": "€/kWh"},
+                                    "2018":{"value": 0.715e-2, "unit": "€/kWh"},
+                                    "2019":{"value": 0.585e-2, "unit": "€/kWh"},
+                                    "2020":{"value": 0.584e-2, "unit": "€/kWh"},
+                                    "2021":{"value": 0.686e-2, "unit": "€/kWh"},
+                                    "2022":{"value": 0.815e-2, "unit": "€/kWh"}}
+
 }
