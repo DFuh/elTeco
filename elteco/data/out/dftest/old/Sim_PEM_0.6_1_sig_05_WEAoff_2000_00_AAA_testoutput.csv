@@ -1,0 +1,38 @@
+{
+    "2014": {
+        "E_LHV_H2": 2760.455502715786,
+        "m_H2": 82.84680380299478,
+        "V_H2": 921.0976931511374,
+        "m_O2": 660.3921980254383,
+        "V_O2": 462.55444041181255,
+        "m_H2O": 743.6013534191975,
+        "E_util": 1207.6726701100029,
+        "E_in": 1333.3333333333317,
+        "t_op_el": 0.16666666666666657,
+        "t_op_gen": null,
+        "t_fl_el": null,
+        "t_fl_gen": null,
+        "tea_2014": {
+            "capital_costs_stack": 291.2601946463294,
+            "annuity_factor": 5.000000000000002,
+            "capex_el": 485.9190914016263,
+            "capex_st": 448.5406997553473,
+            "capex_tot": 934.4597911569737,
+            "el_pwr_nom": 7000.0,
+            "maintenance_costs": 91000.0,
+            "stackreplacement_costs": 0.0,
+            "stackreplacement_costs_specific": 0.0,
+            "electricity_costs_excl": 112.31355832023027,
+            "electricity_costs_incl": 112.31355832023027,
+            "taxesandinsurances_costs": 1868.9195823139473,
+            "labor_costs": 18356.579999999998,
+            "water_costs": 0.7436013534191975,
+            "oxygen_revenues": 0.0,
+            "volumetric_costs_H2_excl": 35628.61083167566,
+            "volumetric_costs_H2_incl": 35628.627876278886,
+            "gravimetric_costs_H2_excl": 396121.8748435263,
+            "gravimetric_costs_H2_incl": 396122.0643468503,
+            "eta_sys": 2.285764653814966
+        }
+    }
+}
