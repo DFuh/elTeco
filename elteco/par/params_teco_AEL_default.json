@@ -11,7 +11,7 @@
   "lifetime_stack":               {"value": 60000,   "unit":"h", "comm":"60000"},
   "costs_plantacquisition":         {"value": 500,    "unit":"€/kW"},
   "fraction_stackacquisition_pacq": {"value": 0.454,   "unit":"% PAcqC/100"},
-  "lang_factor":                  {"value": 1.54,     "unit":"-"},
+  "lang_factor":                  {"value": 1.0,     "unit":"-", "orig":1.54},
   "capex_curve_fit":{
     "comment": "Values taken from Proost2019, fig4",
     "lower_limit_plant_power": {"value": 2100,    "unit":"kW"},

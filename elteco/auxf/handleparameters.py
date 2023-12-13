@@ -14,14 +14,14 @@ class handleParams():
     #TODO: enable parameter input via xls
     #TODO: add descriptive text in json files ?
 
-    def __init__(self, basepath, test=False):
+    def __init__(self, basepath, test=False,slct_par_version=True):
         self.lst_parfiles = glob.glob(basepath+'/par/*.json')
 
         #print(self.lst_parfiles)
         self.print_filelist(self.lst_parfiles, name='Parameter')
-        if not test:
-            self.parameter_version = self.select_par_version()
-        self.dct = self.read_params(basepath, test)
+        #if slct_par_version:
+        self.parameter_version = self.select_par_version(slct_par_version)
+        self.dct = self.read_params(basepath, test, slct_par_version)
 
         print(" --- finished parameter reading --- ")
 
@@ -36,20 +36,22 @@ class handleParams():
         return
 
 
-    def select_par_version(self):
+    def select_par_version(self, slct_version):
 
-        vers_input = input('Insert parameter version to be used: [integer/key] (any key -> default)')
+        if slct_version:
+            vers_input = input('Insert parameter version to be used: [integer/key] (any key -> default)')
 
-        try:
-            version = int(vers_input)
-            print('Parameter version: ', version)
-        except:
-            print('Using default parameters...')
-            version = None
+            try:
+                version = int(vers_input)
+                print('Parameter version: ', version)
+            except:
+                version = vers_input
+        else:
+            version = ''
         return version
 
 
-    def read_params(self,pth0, test):
+    def read_params(self,pth0, test, slct_par_version):
         '''
         read parameter files based on version
         '''
@@ -59,22 +61,35 @@ class handleParams():
         dct_par = {}
         par_strng = ['basic',
                     'electricity_costs',
+                    'electricity_surcharges',
+                    'acquisition_PEM',
+                    'acquisition_AEL',
                     'teco_AEL',
                     'teco_PEM',
                     'teco_storage',
                     'external_scenario']
         #for dfi, pthi in
 
-        if test:
-            suffix = '_test.json'
-        elif not self.parameter_version:
-            suffix = '_default.json'
-        else:
-            suffix = '_v' + self.parameter_version + '.json'
+
 
         for pthi in par_strng:
+            print('Parameter-Set: ', pthi)
+            if test:
+                suffix = '_test.json'
+            elif not self.parameter_version or slct_par_version==False:
+                print('Using default parameters...')
+                suffix = '_default.json'
+            else:
+                if type(self.parameter_version) ==int:
+                    suffix = '_v' + str(self.parameter_version) + '.json'
+                else:
+                    suffix = '_'+self.parameter_version + '.json'
             jsonpth = pth0 + '/par/params_' + pthi + suffix
 
+            if not os.path.exists(jsonpth):
+                print('Parameter-Set not found: ', jsonpth)
+                print('Using default parameters ... ')
+                jsonpth = pth0 + '/par/params_' + pthi + '_default.json'
             #df_par.append(self.json_to_df(jsonpth))
             #print(jsonpth)
             with open(jsonpth) as jsonfile:

@@ -20,7 +20,14 @@
   "post_eeg": false,
   "enable_agoradata": false,
 
-  "fitting_fnctn_capital_costs":         true,
+  "fitting_fnctn_capital_costs":         false,
+  "yearspecific_capital_costs":         true,
+  "yearspecific_electricity_costs":     true,
+  "extreme_electricity_costs":          "LO",
+  "evaluate_years_eCe":                 ["2022",
+                                          "2022s",
+                                          "2025","2030","2035",
+                                          "2040","2045","2050"],
   "include_costs_electricity":          true,
   "include_costs_capitalinvest":        true,
   "include_costs_maintenance":          true,
@@ -28,7 +35,7 @@
   "include_costs_taxesandinsurances":   true,
   "include_costs_labor":                true,
   "include_costs_water":                true,
-  "include_costs_storage":                true,
+  "include_costs_storage":                false,
   "include_costs_external_compression": false,
   "include_revenues_oxygen": true,
 
@@ -41,6 +48,8 @@
   "print_while_reading_props":  true,
   "print_tea_costs_values":     false,
 
+  "select_parameter version": false,
+  "check_electricity_costs_value": false,
   "manual_file_selection": true,
   "new_clc_matbal": false,
   "tkinter_installed": false

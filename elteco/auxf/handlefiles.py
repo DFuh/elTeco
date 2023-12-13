@@ -31,7 +31,7 @@ print('cwd: ', os.getcwd())
 class handleInputFiles():
     """ main handling of files
     """
-    def __init__(self, basepath, params, pth_data_loc=None):
+    def __init__(self, params, pth_data_loc=None, basepath=None):
 
         self.basepath = basepath
         self.yr_cnt = 0
@@ -974,3 +974,25 @@ class handleOutputFiles():
             print(att,': ', getattr(obj,att))
 
         return
+
+def prnt_fllst(fllst, name='NoName'):
+    '''
+
+
+    Parameters
+    ----------
+    fllst : TYPE
+        DESCRIPTION.
+    name : TYPE, optional
+        DESCRIPTION. The default is 'NoName'.
+
+    Returns
+    -------
+    None.
+
+    '''
+
+    print(f'Filelist [{name}] contains the following files: ')
+    for i,fl in enumerate(fllst):
+        print(f'[{i}] ->|  ', fl)
+    return
