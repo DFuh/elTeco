@@ -333,6 +333,12 @@ def clc_capitalCosts(self, bscpar, tecpar, mat, res):
     return ccomp * P_N * res['capex_tot'] * res['annuity_factor'] # capex_costs // in €/a
 
 
+def clc_maintenancecosts(nominal_power, maintenance_costs_spc):
+    '''
+    clc total maintenance costs 
+    '''
+    return nominal_power * maintenance_costs_spc
+
 
 def clc_maintenanceCosts(self, bscpar, tecpar, mat, res):
     ### maintenance costs
