@@ -311,6 +311,13 @@ def capex_fit(self, P_in, tecpar):
     print('k_spec: ', k_spec)
     return k_spec
 
+def clc_capitalcosts(nominal_power, capex_tot, annuity_factor):
+    '''
+    calculation of capital costs of WE plant
+    '''
+    return nominal_power * capex_tot * annuity_factor
+
+
 def clc_capitalCosts(self, bscpar, tecpar, mat, res):
     ### CAPEX
     #self.k_cap = self.glbPar.c_k_cap * P_plnt * Tec.aC * Tec.rF *self.Af # // in kW * €/kW * 1 * 1/a
