@@ -21,7 +21,6 @@ class AuxVal():
     pass
 
 
-
 def econ(self, bsc_par, tec_par, elec_par, surch_par, cpx_par, matbal,
                 teares, yr): # CstPar_in, eC, mat_in, signm):
     ''' adopted from CS_Mod/Eco_clc_oop_v063.py '''
@@ -52,7 +51,8 @@ def econ(self, bsc_par, tec_par, elec_par, surch_par, cpx_par, matbal,
         skip=False
 
     if not skip:
-        # clc_auxVal(self, bsc_par, tec_par, cpx_par, matbal,teares, yr)
+        clc_auxVal(self, bsc_par, tec_par, cpx_par, matbal,teares, yr)
+
         clc_auxVal(self, )
 
         self.av = AuxVal()
@@ -194,7 +194,30 @@ def clc_annuity_factor(interestrate, lifetime_we):
             ( ( ( interestrate + 1 )**lifetime_we ) - 1 )
 
 
-def clc_auxVal(self, interest_rate, lifetime_electrolyser):
+def clc_costs_stacks_bare(acquisition_costs, fraction_stackacquisition):
+    return acquisition_costs * fraction_stackacquisition
+
+
+def clc_costs_plant_equipment(acquisition_costs, fraction_stackacquisition):
+    '''
+    costs of plant acquisition without the stack(s)
+    '''
+    return acquisition_costs * (1 - fraction_stackacquisition)
+
+
+
+def clc_acquisition_costs(acquisition_costs, fraction_stackacquisition, lang_factor):
+
+    c_equip = clc_costs_plant_equipment(acquisition_costs, fraction_stackacquisition)
+    c_stacks_bare = clc_costs_stacks_bare(acquisition_costs, fraction_stackacquisition)
+    capex_we = c_equip * lang_factor
+    capex_stacks = c_stacks_bare * lang_factor
+    cpaex_tot = acquisition_costs * lang_factor
+    return capex_we, capex_stacks, capex_tot
+
+
+def clc_auxVal(self, interest_rate, lifetime_electrolyser,
+                capex_we, ):
 
     #self.P_plnt = Mat.P_N / 1e3 # // in kW (P_N in W)
     #print('P_plnt: ', P_plnt, '-----','eCe, eCI: ', self.eCe,', ',self.eCi )
