@@ -211,7 +211,7 @@ def clc_spc_acquisition_costs(acquisition_costs, fraction_stackacquisition, lang
     c_stacks_bare = clc_costs_stacks_bare(acquisition_costs, fraction_stackacquisition)
     capex_we = c_equip * lang_factor
     capex_stacks = c_stacks_bare * lang_factor
-    cpaex_tot = acquisition_costs * lang_factor
+    capex_tot = acquisition_costs * lang_factor
     return capex_we, capex_stacks, capex_tot
 
 
