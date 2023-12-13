@@ -194,19 +194,18 @@ def clc_annuity_factor(interestrate, lifetime_we):
             ( ( ( interestrate + 1 )**lifetime_we ) - 1 )
 
 
-def clc_costs_stacks_bare(acquisition_costs, fraction_stackacquisition):
+def clc_spc_costs_stacks_bare(acquisition_costs, fraction_stackacquisition):
     return acquisition_costs * fraction_stackacquisition
 
 
-def clc_costs_plant_equipment(acquisition_costs, fraction_stackacquisition):
+def clc_spc_costs_plant_equipment(acquisition_costs, fraction_stackacquisition):
     '''
     costs of plant acquisition without the stack(s)
     '''
     return acquisition_costs * (1 - fraction_stackacquisition)
 
 
-
-def clc_acquisition_costs(acquisition_costs, fraction_stackacquisition, lang_factor):
+def clc_spc_acquisition_costs(acquisition_costs, fraction_stackacquisition, lang_factor):
 
     c_equip = clc_costs_plant_equipment(acquisition_costs, fraction_stackacquisition)
     c_stacks_bare = clc_costs_stacks_bare(acquisition_costs, fraction_stackacquisition)
