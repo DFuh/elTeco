@@ -1,6 +1,9 @@
 '''
 do techno-economic-analysis calculation
+
+explicit args for econ not only namedtuples etc.)
 '''
+
 import math
 import numpy as np
 
