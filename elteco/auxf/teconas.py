@@ -52,7 +52,8 @@ def econ(self, bsc_par, tec_par, elec_par, surch_par, cpx_par, matbal,
         skip=False
 
     if not skip:
-        clc_auxVal(self, bsc_par, tec_par, cpx_par, matbal,teares, yr)
+        # clc_auxVal(self, bsc_par, tec_par, cpx_par, matbal,teares, yr)
+        clc_auxVal(self, )
 
         self.av = AuxVal()
         ''' >>>>>>>>>>>>>>>>> check and edit below !! <<<<<<<<<<<<<<<<<<<<<< '''
@@ -184,18 +185,22 @@ def clc_costsum_abs(self, bscpar, res):
 
     return costs, revenues
 
+def clc_annuity_factor(interestrate, lifetime_we):
+    '''
+        Calc. annuity factor
+    '''
 
-def clc_auxVal(self, bscpar, tecpar, cpxpar, mat, res, yr):
+    return  (interestrate * (interestrate + 1)**lifetime_we ) /
+            ( ( ( interestrate + 1 )**lifetime_we ) - 1 )
+
+
+def clc_auxVal(self, interest_rate, lifetime_electrolyser):
 
     #self.P_plnt = Mat.P_N / 1e3 # // in kW (P_N in W)
     #print('P_plnt: ', P_plnt, '-----','eCe, eCI: ', self.eCe,', ',self.eCi )
     print('(auxVAl) ', self.el_pwr_nom)#['el_pwr_nom'])
     ### annuity factor
-    #i_r = Tec.iR     # // in 1
-    i_r = tecpar['interest_rate']['value']/100
-    tau = tecpar['lifetime_electrolyser']['value']  # // in a
-    Af = ( i_r * (i_r + 1)**tau ) / ( ( ( i_r + 1 )**tau ) - 1 )
-    #print('Af:', Af) # ~0.08 (tau=20a, iR=5%)
+    annuityfactor = clc_annuity_factor(interestrate, lifetime_we)
 
     if self.ext_scen:
         aC = mat['capex'] # capex value from external-matbal file in €/kW
