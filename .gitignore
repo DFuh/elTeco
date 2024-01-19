@@ -1,5 +1,7 @@
 # own
 elteco/data/in/*
+elteco/data/mat/*
+elteco/data/out/*
 elteco/par/*
 
 
